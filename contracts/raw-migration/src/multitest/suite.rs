@@ -1,13 +1,13 @@
 use anyhow::Result as AnyResult;
 
 use cw20::MinterResponse;
-use wyndex::asset::AssetInfo;
-use wyndex::factory::{
+use palomadex::asset::AssetInfo;
+use palomadex::factory::{
     DefaultStakeConfig, ExecuteMsg as FactoryExecuteMsg, InstantiateMsg as FactoryInstantiateMsg,
     PairConfig, PairType, PartialStakeConfig, QueryMsg as FactoryQueryMsg,
 };
-use wyndex::fee_config::FeeConfig;
-use wyndex::pair::{PairInfo, PoolResponse, QueryMsg as PairQueryMsg};
+use palomadex::fee_config::FeeConfig;
+use palomadex::pair::{PairInfo, PoolResponse, QueryMsg as PairQueryMsg};
 
 use crate::msg::{MigrateMsg, OrigMigrateMsg, QueryMsg};
 use cosmwasm_std::{coin, to_binary, Addr, Coin, Decimal, Uint128};
@@ -53,36 +53,36 @@ pub fn store_cw20(app: &mut App) -> u64 {
     app.store_code(contract)
 }
 
-pub fn store_wyndex_staking(app: &mut App) -> u64 {
+pub fn store_palomadex_staking(app: &mut App) -> u64 {
     let contract = Box::new(ContractWrapper::new(
-        wyndex_stake::contract::execute,
-        wyndex_stake::contract::instantiate,
-        wyndex_stake::contract::query,
+        palomadex_stake::contract::execute,
+        palomadex_stake::contract::instantiate,
+        palomadex_stake::contract::query,
     ));
     app.store_code(contract)
 }
 
-fn store_wyndex_factory(app: &mut App) -> u64 {
+fn store_palomadex_factory(app: &mut App) -> u64 {
     let factory_contract = Box::new(
         ContractWrapper::new_with_empty(
-            wyndex_factory::contract::execute,
-            wyndex_factory::contract::instantiate,
-            wyndex_factory::contract::query,
+            palomadex_factory::contract::execute,
+            palomadex_factory::contract::instantiate,
+            palomadex_factory::contract::query,
         )
-        .with_reply_empty(wyndex_factory::contract::reply),
+        .with_reply_empty(palomadex_factory::contract::reply),
     );
 
     app.store_code(factory_contract)
 }
 
-fn store_wyndex_pair(app: &mut App) -> u64 {
+fn store_palomadex_pair(app: &mut App) -> u64 {
     let factory_contract = Box::new(
         ContractWrapper::new_with_empty(
-            wyndex_pair::contract::execute,
-            wyndex_pair::contract::instantiate,
-            wyndex_pair::contract::query,
+            palomadex_pair::contract::execute,
+            palomadex_pair::contract::instantiate,
+            palomadex_pair::contract::query,
         )
-        .with_reply_empty(wyndex_pair::contract::reply),
+        .with_reply_empty(palomadex_pair::contract::reply),
     );
 
     app.store_code(factory_contract)
@@ -95,7 +95,6 @@ pub fn store_migrator(app: &mut App) -> u64 {
             crate::contract::instantiate,
             crate::contract::query,
         )
-        .with_migrate(crate::contract::migrate)
         .with_reply(crate::contract::reply),
     );
     app.store_code(contract)
@@ -238,18 +237,18 @@ impl SuiteBuilder {
             .unwrap();
         app.update_block(next_block);
 
-        // Instantiate wyndex factory
-        let wyndex_stake_code_id = store_wyndex_staking(&mut app);
-        let wyndex_pair_code_id = store_wyndex_pair(&mut app);
-        let wyndex_factory_code_id = store_wyndex_factory(&mut app);
+        // Instantiate palomadex factory
+        let palomadex_stake_code_id = store_palomadex_staking(&mut app);
+        let palomadex_pair_code_id = store_palomadex_pair(&mut app);
+        let palomadex_factory_code_id = store_palomadex_factory(&mut app);
         let factory_contract = app
             .instantiate_contract(
-                wyndex_factory_code_id,
+                palomadex_factory_code_id,
                 owner.clone(),
                 &FactoryInstantiateMsg {
                     pair_configs: vec![PairConfig {
                         pair_type: PairType::Xyk {},
-                        code_id: wyndex_pair_code_id,
+                        code_id: palomadex_pair_code_id,
                         fee_config: FeeConfig {
                             total_fee_bps: 0,
                             protocol_fee_bps: 0,
@@ -261,7 +260,7 @@ impl SuiteBuilder {
                     owner: owner.to_string(),
                     max_referral_commission: Decimal::one(),
                     default_stake_config: DefaultStakeConfig {
-                        staking_code_id: wyndex_stake_code_id,
+                        staking_code_id: palomadex_stake_code_id,
                         tokens_per_power: Uint128::new(1000),
                         min_bond: Uint128::new(1000),
                         unbonding_periods: self.unbonding_periods.clone(),
@@ -271,7 +270,7 @@ impl SuiteBuilder {
                     trading_starts: None,
                 },
                 &[],
-                "wyndex-factory",
+                "palomadex-factory",
                 Some(owner.to_string()),
             )
             .unwrap();
@@ -281,8 +280,8 @@ impl SuiteBuilder {
                 cw20_code_id,
                 Addr::unchecked(owner.clone()),
                 &Cw20BaseInstantiateMsg {
-                    name: "WYND".to_owned(),
-                    symbol: "WYND".to_owned(),
+                    name: "PALOMA".to_owned(),
+                    symbol: "PALOMA".to_owned(),
                     decimals: 6,
                     initial_balances: vec![],
                     mint: Some(MinterResponse {
@@ -292,7 +291,7 @@ impl SuiteBuilder {
                     marketing: None,
                 },
                 &[],
-                "WYND".to_owned(),
+                "PALOMA".to_owned(),
                 None,
             )
             .unwrap();
@@ -307,7 +306,7 @@ impl SuiteBuilder {
             AssetInfo::Token(wynd_cw20_token.to_string()),
         ];
 
-        // Instantiate wyndex pair contract through factory
+        // Instantiate palomadex pair contract through factory
         app.execute_contract(
             owner.clone(),
             factory_contract.clone(),
@@ -337,9 +336,9 @@ impl SuiteBuilder {
             )
             .unwrap();
 
-        let wyndex_pair_contract = pair_info.contract_addr;
-        let wyndex_staking_contract = pair_info.staking_addr;
-        let wyndex_token_contract = pair_info.liquidity_token;
+        let palomadex_pair_contract = pair_info.contract_addr;
+        let palomadex_staking_contract = pair_info.staking_addr;
+        let palomadex_token_contract = pair_info.liquidity_token;
 
         // add funds to the contract
         let funds = self.funds;
@@ -360,10 +359,10 @@ impl SuiteBuilder {
             junoswap_pool_contract,
             junoswap_staking_contract,
             factory_contract,
-            wyndex_pair_contract,
-            wyndex_staking_contract,
-            wyndex_token_contract,
-            wynd_cw20_token,
+            palomadex_pair_contract,
+            palomadex_staking_contract,
+            palomadex_token_contract,
+            grain_cw20_token: wynd_cw20_token,
             migrator_code_id,
             cw20_code_id,
             pool_denom1,
@@ -383,10 +382,10 @@ pub struct Suite {
     pub junoswap_token_contract: Addr,
     pub junoswap_pool_contract: Addr,
     pub junoswap_staking_contract: Addr,
-    pub wynd_cw20_token: Addr,
-    pub wyndex_token_contract: Addr,
-    pub wyndex_staking_contract: Addr,
-    pub wyndex_pair_contract: Addr,
+    pub grain_cw20_token: Addr,
+    pub palomadex_token_contract: Addr,
+    pub palomadex_staking_contract: Addr,
+    pub palomadex_pair_contract: Addr,
     pub pool_denom1: Denom,
     pub pool_denom2: Denom,
 
@@ -400,9 +399,9 @@ struct SuiteInfo<'a> {
     pub junoswap_pool_contract: &'a Addr,
     pub junoswap_staking_contract: &'a Addr,
     pub factory_contract: &'a Addr,
-    pub wyndex_token_contract: &'a Addr,
-    pub wyndex_staking_contract: &'a Addr,
-    pub wyndex_pair_contract: &'a Addr,
+    pub palomadex_token_contract: &'a Addr,
+    pub palomadex_staking_contract: &'a Addr,
+    pub palomadex_pair_contract: &'a Addr,
 }
 
 impl Suite {
@@ -414,9 +413,9 @@ impl Suite {
             junoswap_pool_contract: &self.junoswap_pool_contract,
             junoswap_staking_contract: &self.junoswap_staking_contract,
             factory_contract: &self.factory_contract,
-            wyndex_token_contract: &self.wyndex_token_contract,
-            wyndex_staking_contract: &self.wyndex_staking_contract,
-            wyndex_pair_contract: &self.wyndex_pair_contract,
+            palomadex_token_contract: &self.palomadex_token_contract,
+            palomadex_staking_contract: &self.palomadex_staking_contract,
+            palomadex_pair_contract: &self.palomadex_pair_contract,
         };
         println!("{:?}", info);
     }
@@ -441,8 +440,8 @@ impl Suite {
     pub fn migrate_tokens(
         &mut self,
         migrator: Option<Addr>,
-        wyndex_pair_migrate: Option<Addr>,
-        wyndex_pair: Option<Addr>,
+        palomadex_pair_migrate: Option<Addr>,
+        palomadex_pair: Option<Addr>,
         raw_to_wynd_exchange_rate: Decimal,
         raw_address: Addr,
     ) -> AnyResult<AppResponse> {
@@ -461,10 +460,10 @@ impl Suite {
                     unbonding_period: self.migration_unbonding_period(),
                     junoswap_pool: self.junoswap_pool_contract.to_string(),
                     factory: self.factory_contract.to_string(),
-                    wynddex_pool: wyndex_pair_migrate.map(|p| p.to_string()),
-                    raw_to_wynd_exchange_rate,
+                    palomadex_pool: palomadex_pair_migrate.map(|p| p.to_string()),
+                    raw_to_grain_exchange_rate: raw_to_wynd_exchange_rate,
                     raw_address: raw_address.to_string(),
-                    wynd_address: self.wynd_cw20_token.to_string(),
+                    grain_address: self.grain_cw20_token.to_string(),
                 }),
             },
             self.migrator_code_id,
@@ -483,8 +482,8 @@ impl Suite {
             self.owner.clone(),
             self.junoswap_staking_contract.clone(),
             &crate::msg::ExecuteMsg::MigrateTokens {
-                wynddex_pool: wyndex_pair
-                    .unwrap_or_else(|| self.wyndex_pair_contract.clone())
+                palomadex_pool: palomadex_pair
+                    .unwrap_or_else(|| self.palomadex_pair_contract.clone())
                     .to_string(),
             },
             &[],
@@ -502,18 +501,18 @@ impl Suite {
         )
     }
 
-    pub fn migrate_to_wyndex(
+    pub fn migrate_to_palomadex(
         &mut self,
         migrator: Option<Addr>,
-        wyndex_pair_migrate: Option<Addr>,
-        wyndex_pair: Option<Addr>,
+        palomadex_pair_migrate: Option<Addr>,
+        palomadex_pair: Option<Addr>,
         raw_to_wynd_exchange_rate: Decimal,
         raw_address: Addr,
     ) -> AnyResult<()> {
         self.migrate_tokens(
             migrator,
-            wyndex_pair_migrate,
-            wyndex_pair,
+            palomadex_pair_migrate,
+            palomadex_pair,
             raw_to_wynd_exchange_rate,
             raw_address,
         )?;
@@ -684,19 +683,19 @@ impl Suite {
         resp
     }
 
-    pub fn query_wyndex_pool(&mut self) -> PoolResponse {
+    pub fn query_palomadex_pool(&mut self) -> PoolResponse {
         self.app
             .wrap()
-            .query_wasm_smart::<PoolResponse>(&self.wyndex_pair_contract, &PairQueryMsg::Pool {})
+            .query_wasm_smart::<PoolResponse>(&self.palomadex_pair_contract, &PairQueryMsg::Pool {})
             .unwrap()
     }
 
-    pub fn total_wyndex_lp(&mut self) -> u128 {
+    pub fn total_palomadex_lp(&mut self) -> u128 {
         let cw20::TokenInfoResponse { total_supply, .. } = self
             .app
             .wrap()
             .query_wasm_smart(
-                &self.wyndex_token_contract,
+                &self.palomadex_token_contract,
                 &cw20::Cw20QueryMsg::TokenInfo {},
             )
             .unwrap();
@@ -704,12 +703,12 @@ impl Suite {
         total_supply.u128()
     }
 
-    pub fn wyndex_lp(&mut self, user: &str) -> u128 {
+    pub fn palomadex_lp(&mut self, user: &str) -> u128 {
         let cw20::BalanceResponse { balance } = self
             .app
             .wrap()
             .query_wasm_smart(
-                &self.wyndex_token_contract,
+                &self.palomadex_token_contract,
                 &cw20::Cw20QueryMsg::Balance {
                     address: user.to_string(),
                 },
@@ -721,12 +720,12 @@ impl Suite {
 
     // for debugging tests
     #[allow(dead_code)]
-    pub fn wyndex_lp_holders(&mut self) -> Vec<(String, u128)> {
+    pub fn palomadex_lp_holders(&mut self) -> Vec<(String, u128)> {
         let cw20::AllAccountsResponse { accounts } = self
             .app
             .wrap()
             .query_wasm_smart(
-                &self.wyndex_token_contract,
+                &self.palomadex_token_contract,
                 &cw20::Cw20QueryMsg::AllAccounts {
                     start_after: None,
                     limit: None,
@@ -735,22 +734,22 @@ impl Suite {
             .unwrap();
         accounts
             .into_iter()
-            .map(|addr| (addr.clone(), self.wyndex_lp(&addr)))
+            .map(|addr| (addr.clone(), self.palomadex_lp(&addr)))
             .collect()
     }
 
-    pub fn total_wyndex_staked(&mut self) -> u128 {
-        let addr = self.wyndex_staking_contract.clone();
-        self.wyndex_lp(addr.as_str())
+    pub fn total_palomadex_staked(&mut self) -> u128 {
+        let addr = self.palomadex_staking_contract.clone();
+        self.palomadex_lp(addr.as_str())
     }
 
-    pub fn wyndex_staked(&mut self, user: &str, unbonding_period: u64) -> u128 {
-        let wyndex_stake::msg::StakedResponse { stake, .. } = self
+    pub fn palomadex_staked(&mut self, user: &str, unbonding_period: u64) -> u128 {
+        let palomadex_stake::msg::StakedResponse { stake, .. } = self
             .app
             .wrap()
             .query_wasm_smart(
-                &self.wyndex_staking_contract,
-                &wyndex_stake::msg::QueryMsg::Staked {
+                &self.palomadex_staking_contract,
+                &palomadex_stake::msg::QueryMsg::Staked {
                     address: user.to_string(),
                     unbonding_period,
                 },

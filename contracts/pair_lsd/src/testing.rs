@@ -1,7 +1,7 @@
 use crate::contract::{execute, instantiate, migrate, query};
 use crate::state::CONFIG;
-use wyndex::fee_config::FeeConfig;
-use wyndex::oracle::{SamplePeriod, TwapResponse};
+use palomadex::fee_config::FeeConfig;
+use palomadex::oracle::{SamplePeriod, TwapResponse};
 // TODO: Copied here just as a temporary measure
 use crate::mock_querier::mock_dependencies;
 
@@ -13,8 +13,8 @@ use cosmwasm_std::{
 use cw20::{Cw20ExecuteMsg, Cw20ReceiveMsg, MinterResponse};
 use cw20_base::msg::InstantiateMsg as TokenInstantiateMsg;
 use cw_utils::MsgInstantiateContractResponse;
-use wyndex::asset::{Asset, AssetInfo, AssetInfoValidated, MINIMUM_LIQUIDITY_AMOUNT};
-use wyndex::pair::{
+use palomadex::asset::{Asset, AssetInfo, AssetInfoValidated, MINIMUM_LIQUIDITY_AMOUNT};
+use palomadex::pair::{
     ContractError, Cw20HookMsg, ExecuteMsg, InstantiateMsg, MigrateMsg, QueryMsg, StablePoolParams,
     StakeConfig,
 };
@@ -36,7 +36,7 @@ fn store_liquidity_token(deps: DepsMut, contract_addr: String) {
     };
 
     let mut config = CONFIG.load(deps.storage).unwrap();
-    let _res = wyndex::pair::instantiate_lp_token_reply(
+    let _res = palomadex::pair::instantiate_lp_token_reply(
         &deps,
         res,
         &config.factory_addr,
@@ -114,7 +114,7 @@ fn proper_initialization() {
                 .unwrap(),
                 funds: vec![],
                 admin: Some("owner".to_owned()),
-                label: String::from("Wyndex LP token"),
+                label: String::from("Palomadex LP token"),
             }
             .into(),
             id: 1,
@@ -926,7 +926,7 @@ fn withdraw_liquidity() {
     store_liquidity_token(deps.as_mut(), "liquidity0000".to_string());
 
     // need to initialize oracle, because we don't call `provide_liquidity` in this test
-    wyndex::oracle::initialize_oracle(
+    palomadex::oracle::initialize_oracle(
         &mut deps.storage,
         &mock_env_with_block_time(0),
         Decimal::one(),
@@ -1173,10 +1173,10 @@ fn query_twap() {
 mod disabled {
     use super::*;
     use crate::utils::{accumulate_prices, compute_swap, select_pools};
+    use palomadex::factory::PairType;
+    use palomadex::querier::NATIVE_TOKEN_PRECISION;
     use proptest::prelude::*;
     use sim::StableSwapModel;
-    use wyndex::factory::PairType;
-    use wyndex::querier::NATIVE_TOKEN_PRECISION;
 
     use crate::contract::{
         assert_max_spread, query_pool, query_reverse_simulation, query_share, query_simulation,
@@ -1185,8 +1185,8 @@ mod disabled {
     use crate::state::{store_precisions, Config};
     use cosmwasm_std::coin;
     use itertools::Itertools;
-    use wyndex::asset::{native_asset, native_asset_info, PairInfo};
-    use wyndex::pair::{PoolResponse, SimulationResponse, TWAP_PRECISION};
+    use palomadex::asset::{native_asset, native_asset_info, PairInfo};
+    use palomadex::pair::{PoolResponse, SimulationResponse, TWAP_PRECISION};
 
     #[test]
     fn try_native_to_token() {

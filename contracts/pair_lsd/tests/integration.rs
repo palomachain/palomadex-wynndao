@@ -1,10 +1,10 @@
-use wyndex::asset::{Asset, AssetInfo, AssetInfoExt, AssetInfoValidated};
-use wyndex::factory::{
+use palomadex::asset::{Asset, AssetInfo, AssetInfoExt, AssetInfoValidated};
+use palomadex::factory::{
     DefaultStakeConfig, ExecuteMsg as FactoryExecuteMsg, InstantiateMsg as FactoryInstantiateMsg,
     PairConfig, PairType, PartialStakeConfig, QueryMsg as FactoryQueryMsg,
 };
-use wyndex::fee_config::FeeConfig;
-use wyndex::pair::{
+use palomadex::fee_config::FeeConfig;
+use palomadex::pair::{
     ConfigResponse, CumulativePricesResponse, Cw20HookMsg, ExecuteMsg, InstantiateMsg, PairInfo,
     PoolResponse, QueryMsg, StablePoolConfig, StablePoolParams, StablePoolUpdateParams,
     TWAP_PRECISION,
@@ -16,8 +16,8 @@ use cosmwasm_std::{
 use cw20::{BalanceResponse, Cw20Coin, Cw20ExecuteMsg, Cw20QueryMsg, MinterResponse};
 use cw20_base::msg::InstantiateMsg as TokenInstantiateMsg;
 use cw_multi_test::{App, ContractWrapper, Executor};
-use wyndex::querier::query_token_balance;
-use wyndex_pair_lsd::math::{MAX_AMP, MAX_AMP_CHANGE, MIN_AMP_CHANGING_TIME};
+use palomadex::querier::query_token_balance;
+use palomadex_pair_lsd::math::{MAX_AMP, MAX_AMP_CHANGE, MIN_AMP_CHANGING_TIME};
 
 const OWNER: &str = "owner";
 
@@ -41,11 +41,11 @@ fn store_token_code(app: &mut App) -> u64 {
 fn store_pair_code(app: &mut App) -> u64 {
     let pair_contract = Box::new(
         ContractWrapper::new_with_empty(
-            wyndex_pair_lsd::contract::execute,
-            wyndex_pair_lsd::contract::instantiate,
-            wyndex_pair_lsd::contract::query,
+            palomadex_pair_lsd::contract::execute,
+            palomadex_pair_lsd::contract::instantiate,
+            palomadex_pair_lsd::contract::query,
         )
-        .with_reply_empty(wyndex_pair_lsd::contract::reply),
+        .with_reply_empty(palomadex_pair_lsd::contract::reply),
     );
 
     app.store_code(pair_contract)
@@ -54,11 +54,11 @@ fn store_pair_code(app: &mut App) -> u64 {
 fn store_factory_code(app: &mut App) -> u64 {
     let factory_contract = Box::new(
         ContractWrapper::new_with_empty(
-            wyndex_factory::contract::execute,
-            wyndex_factory::contract::instantiate,
-            wyndex_factory::contract::query,
+            palomadex_factory::contract::execute,
+            palomadex_factory::contract::instantiate,
+            palomadex_factory::contract::query,
         )
-        .with_reply_empty(wyndex_factory::contract::reply),
+        .with_reply_empty(palomadex_factory::contract::reply),
     );
 
     app.store_code(factory_contract)
@@ -66,9 +66,9 @@ fn store_factory_code(app: &mut App) -> u64 {
 
 fn store_stake_code(app: &mut App) -> u64 {
     let staking_contract = Box::new(ContractWrapper::new_with_empty(
-        wyndex_stake::contract::execute,
-        wyndex_stake::contract::instantiate,
-        wyndex_stake::contract::query,
+        palomadex_stake::contract::execute,
+        palomadex_stake::contract::instantiate,
+        palomadex_stake::contract::query,
     ));
 
     app.store_code(staking_contract)

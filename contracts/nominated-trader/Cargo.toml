@@ -1,12 +1,12 @@
 [package]
 name = "nominated-trader"
-authors = ["Cosmorama <cosmorama@proton.me>, 0xFable <0xfable@protonmail.com>"]
+authors = ["Volume Fi"]
 version = { workspace = true }
 edition = { workspace = true }
-description = "Collects and swaps collected protocol fees as WYND tokens. Actively managed funds owned by WYND DAO"
+description = "Collects and swaps collected protocol fees as Grain tokens. Actively managed funds owned by PALOMACHAIN"
 license = { workspace = true }
 repository = { workspace = true }
-homepage = "https://www.wynddao.com"
+homepage = "https://www.palomachain.com"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -26,15 +26,15 @@ cw-storage-plus = { workspace = true }
 cw2 = { workspace = true }
 cw-utils = { workspace = true }
 thiserror = { workspace = true }
-wyndex = { workspace = true }
+palomadex = { workspace = true }
 cw20 = { workspace = true }
 
 [dev-dependencies]
 anyhow = { workspace = true }
 cw-multi-test = { workspace = true }
 cw20-base = { workspace = true }
-wyndex-factory = { workspace = true }
-wyndex-pair = { workspace = true }
-wyndex-multi-hop = { workspace = true }
-wyndex-pair-lsd = { workspace = true }
-wyndex-stake = { workspace = true }
+palomadex-factory = { workspace = true }
+palomadex-pair = { workspace = true }
+palomadex-multi-hop = { workspace = true }
+palomadex-pair-lsd = { workspace = true }
+palomadex-stake = { workspace = true }

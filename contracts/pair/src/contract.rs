@@ -6,33 +6,27 @@ use cosmwasm_std::{
     StdResult, Uint128, Uint256, WasmMsg,
 };
 
-use cw2::set_contract_version;
 use cw20::{Cw20ExecuteMsg, Cw20ReceiveMsg};
-use std::str::FromStr;
-use std::vec;
-use wyndex::asset::{
+use palomadex::asset::{
     addr_opt_validate, check_swap_parameters, Asset, AssetInfoValidated, AssetValidated,
     MINIMUM_LIQUIDITY_AMOUNT,
 };
-use wyndex::decimal2decimal256;
-use wyndex::factory::{ConfigResponse as FactoryConfig, PairType};
-use wyndex::fee_config::FeeConfig;
-use wyndex::pair::{
+use palomadex::decimal2decimal256;
+use palomadex::factory::{ConfigResponse as FactoryConfig, PairType};
+use palomadex::fee_config::FeeConfig;
+use palomadex::pair::{
     add_referral, assert_max_spread, check_asset_infos, check_assets, check_cw20_in_pool,
     create_lp_token, get_share_in_assets, handle_referral, handle_reply, migration_check,
     mint_token_message, save_tmp_staking_config, take_referral, ConfigResponse, ContractError,
-    Cw20HookMsg, MigrateMsg, DEFAULT_SLIPPAGE, MAX_ALLOWED_SLIPPAGE,
+    Cw20HookMsg, DEFAULT_SLIPPAGE, MAX_ALLOWED_SLIPPAGE,
 };
-use wyndex::pair::{
+use palomadex::pair::{
     CumulativePricesResponse, ExecuteMsg, InstantiateMsg, PairInfo, PoolResponse, QueryMsg,
     ReverseSimulationResponse, SimulationResponse, TWAP_PRECISION,
 };
-use wyndex::querier::{query_factory_config, query_supply};
-
-/// Contract name that is used for migration.
-const CONTRACT_NAME: &str = "wyndex-pair";
-/// Contract version that is used for migration.
-const CONTRACT_VERSION: &str = env!("CARGO_PKG_VERSION");
+use palomadex::querier::{query_factory_config, query_supply};
+use std::str::FromStr;
+use std::vec;
 
 /// Creates a new contract with the specified parameters in the [`InstantiateMsg`].
 #[cfg_attr(not(feature = "library"), entry_point)]
@@ -47,8 +41,6 @@ pub fn instantiate(
     if asset_infos.len() != 2 {
         return Err(ContractError::InvalidNumberOfAssets { min: 2, max: 2 });
     }
-
-    set_contract_version(deps.storage, CONTRACT_NAME, CONTRACT_VERSION)?;
 
     msg.validate_fees()?;
 
@@ -93,24 +85,6 @@ pub fn reply(deps: DepsMut, _env: Env, msg: Reply) -> Result<Response, ContractE
     CONFIG.save(deps.storage, &config)?;
 
     Ok(res)
-}
-
-/// Manages the contract migration.
-#[cfg_attr(not(feature = "library"), entry_point)]
-pub fn migrate(deps: DepsMut, _env: Env, msg: MigrateMsg) -> Result<Response, ContractError> {
-    match msg {
-        MigrateMsg::UpdateFreeze {
-            frozen,
-            circuit_breaker,
-        } => {
-            FROZEN.save(deps.storage, &frozen)?;
-            if let Some(circuit_breaker) = circuit_breaker {
-                CIRCUIT_BREAKER.save(deps.storage, &deps.api.addr_validate(&circuit_breaker)?)?;
-            }
-        }
-    }
-
-    Ok(Response::new())
 }
 
 /// Exposes all the execute functions available in the contract.
@@ -465,9 +439,9 @@ pub fn provide_liquidity(
     let price = Decimal::from_ratio(new_pool0, new_pool1);
     if total_share.is_zero() {
         // initialize oracle storage
-        wyndex::oracle::initialize_oracle(deps.storage, &env, price)?;
+        palomadex::oracle::initialize_oracle(deps.storage, &env, price)?;
     } else {
-        wyndex::oracle::store_oracle_price(deps.storage, &env, price)?;
+        palomadex::oracle::store_oracle_price(deps.storage, &env, price)?;
     }
 
     // Accumulate prices for the assets in the pool
@@ -515,7 +489,7 @@ pub fn withdraw_liquidity(
         .zip(refund_assets.iter())
         .map(|(p, r)| p.amount - r.amount);
     let (new_pool0, new_pool1) = (new_pools.next().unwrap(), new_pools.next().unwrap());
-    wyndex::oracle::store_oracle_price(
+    palomadex::oracle::store_oracle_price(
         deps.storage,
         &env,
         Decimal::from_ratio(new_pool0, new_pool1),
@@ -757,7 +731,7 @@ fn do_swap(
             pools[1].amount - protocol_fee_amount - return_amount,
         )
     };
-    wyndex::oracle::store_oracle_price(
+    palomadex::oracle::store_oracle_price(
         deps.storage,
         env,
         Decimal::from_ratio(new_pool0, new_pool1),
@@ -904,7 +878,7 @@ pub fn query(deps: Deps, env: Env, msg: QueryMsg) -> StdResult<Binary> {
             duration,
             start_age,
             end_age,
-        } => to_binary(&wyndex::oracle::query_oracle_range(
+        } => to_binary(&palomadex::oracle::query_oracle_range(
             deps.storage,
             &env,
             &CONFIG.load(deps.storage)?.pair_info.asset_infos,

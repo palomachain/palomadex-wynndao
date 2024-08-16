@@ -4,7 +4,6 @@ use cosmwasm_std::{
     entry_point, from_binary, to_binary, Addr, Api, Binary, Coin, CosmosMsg, Decimal, Deps,
     DepsMut, Env, MessageInfo, Response, StdError, StdResult, Uint128, WasmMsg,
 };
-use cw2::set_contract_version;
 use cw20::{Cw20ExecuteMsg, Cw20ReceiveMsg};
 use cw_utils::ensure_from_older_version;
 
@@ -12,16 +11,12 @@ use crate::msg::{
     ConfigResponse, Cw20HookMsg, ExecuteMsg, InstantiateMsg, MigrateMsg, QueryMsg,
     SimulateSwapOperationsResponse, SwapOperation, MAX_SWAP_OPERATIONS,
 };
-use wyndex::asset::{addr_opt_validate, Asset, AssetInfo, AssetInfoExt};
-use wyndex::pair::{ExecuteMsg as PairExecuteMsg, QueryMsg as PairQueryMsg, SimulationResponse};
-use wyndex::querier::{query_balance, query_pair_info, query_token_balance};
+use palomadex::asset::{addr_opt_validate, Asset, AssetInfo, AssetInfoExt};
+use palomadex::pair::{ExecuteMsg as PairExecuteMsg, QueryMsg as PairQueryMsg, SimulationResponse};
+use palomadex::querier::{query_balance, query_pair_info, query_token_balance};
 
 use crate::error::ContractError;
 use crate::state::{Config, CONFIG};
-
-/// Version info for migration
-const CONTRACT_NAME: &str = "wynd-multi-hop";
-const CONTRACT_VERSION: &str = env!("CARGO_PKG_VERSION");
 
 #[cfg_attr(not(feature = "library"), entry_point)]
 pub fn instantiate(
@@ -30,12 +25,10 @@ pub fn instantiate(
     _info: MessageInfo,
     msg: InstantiateMsg,
 ) -> Result<Response, ContractError> {
-    set_contract_version(deps.storage, CONTRACT_NAME, CONTRACT_VERSION)?;
-
     CONFIG.save(
         deps.storage,
         &Config {
-            wyndex_factory: deps.api.addr_validate(&msg.wyndex_factory)?,
+            palomadex_factory: deps.api.addr_validate(&msg.palomadex_factory)?,
         },
     )?;
 
@@ -150,14 +143,14 @@ mod execute {
         }
 
         let message = match operation {
-            SwapOperation::WyndexSwap {
+            SwapOperation::PalomadexSwap {
                 offer_asset_info,
                 ask_asset_info,
             } => {
                 let config = CONFIG.load(deps.storage)?;
                 let pair_info = query_pair_info(
                     &deps.querier,
-                    config.wyndex_factory,
+                    config.palomadex_factory,
                     &[offer_asset_info.clone(), ask_asset_info.clone()],
                 )?;
 
@@ -234,7 +227,7 @@ mod execute {
                 msg: to_binary(&Cw20ExecuteMsg::Send {
                     contract: pair_contract,
                     amount: offer_asset.amount,
-                    msg: to_binary(&wyndex::pair::Cw20HookMsg::Swap {
+                    msg: to_binary(&palomadex::pair::Cw20HookMsg::Swap {
                         ask_asset_info: Some(ask_asset_info),
                         belief_price,
                         max_spread,
@@ -382,7 +375,7 @@ pub fn query(deps: Deps, _env: Env, msg: QueryMsg) -> Result<Binary, ContractErr
 }
 
 mod query {
-    use wyndex::pair::ReverseSimulationResponse;
+    use palomadex::pair::ReverseSimulationResponse;
 
     use super::*;
 
@@ -390,7 +383,7 @@ mod query {
     pub fn config(deps: Deps) -> Result<ConfigResponse, ContractError> {
         let state = CONFIG.load(deps.storage)?;
         let resp = ConfigResponse {
-            wyndex_factory: state.wyndex_factory.into_string(),
+            palomadex_factory: state.palomadex_factory.into_string(),
         };
 
         Ok(resp)
@@ -411,7 +404,7 @@ mod query {
         operations: Vec<SwapOperation>,
     ) -> Result<SimulateSwapOperationsResponse, ContractError> {
         let config = CONFIG.load(deps.storage)?;
-        let wyndex_factory = config.wyndex_factory;
+        let palomadex_factory = config.palomadex_factory;
 
         let operations_len = operations.len();
         if operations_len == 0 {
@@ -432,13 +425,13 @@ mod query {
         let mut percent_of_ideal = Decimal::one();
         for (idx, operation) in operations.into_iter().enumerate() {
             match operation {
-                SwapOperation::WyndexSwap {
+                SwapOperation::PalomadexSwap {
                     offer_asset_info,
                     ask_asset_info,
                 } => {
                     let pair_info = query_pair_info(
                         &deps.querier,
-                        wyndex_factory.clone(),
+                        palomadex_factory.clone(),
                         &[offer_asset_info.clone(), ask_asset_info.clone()],
                     )?;
 
@@ -504,7 +497,7 @@ mod query {
         operations: Vec<SwapOperation>,
     ) -> Result<SimulateSwapOperationsResponse, ContractError> {
         let config = CONFIG.load(deps.storage)?;
-        let wyndex_factory = config.wyndex_factory;
+        let palomadex_factory = config.palomadex_factory;
 
         let operations_len = operations.len();
         if operations_len == 0 {
@@ -525,13 +518,13 @@ mod query {
         let mut percent_of_ideal = Decimal::one();
         for (idx, operation) in operations.into_iter().enumerate().rev() {
             match operation {
-                SwapOperation::WyndexSwap {
+                SwapOperation::PalomadexSwap {
                     offer_asset_info,
                     ask_asset_info,
                 } => {
                     let pair_info = query_pair_info(
                         &deps.querier,
-                        wyndex_factory.clone(),
+                        palomadex_factory.clone(),
                         &[offer_asset_info.clone(), ask_asset_info.clone()],
                     )?;
 
@@ -589,7 +582,7 @@ fn assert_operations(api: &dyn Api, operations: &[SwapOperation]) -> Result<(), 
     let mut ask_asset_map: HashSet<String> = HashSet::new();
     for operation in operations {
         let (offer_asset, ask_asset) = match operation {
-            SwapOperation::WyndexSwap {
+            SwapOperation::PalomadexSwap {
                 offer_asset_info,
                 ask_asset_info,
             } => (
@@ -609,12 +602,6 @@ fn assert_operations(api: &dyn Api, operations: &[SwapOperation]) -> Result<(), 
     Ok(())
 }
 
-#[cfg_attr(not(feature = "library"), entry_point)]
-pub fn migrate(deps: DepsMut, _env: Env, _msg: MigrateMsg) -> Result<Response, ContractError> {
-    ensure_from_older_version(deps.storage, CONTRACT_NAME, CONTRACT_VERSION)?;
-    Ok(Response::new())
-}
-
 #[cfg(test)]
 mod testing {
     use super::*;
@@ -630,11 +617,11 @@ mod testing {
         assert!(assert_operations(
             deps.as_ref().api,
             &[
-                SwapOperation::WyndexSwap {
+                SwapOperation::PalomadexSwap {
                     offer_asset_info: AssetInfo::Native("ukrw".to_string()),
                     ask_asset_info: AssetInfo::Token("asset0001".to_string()),
                 },
-                SwapOperation::WyndexSwap {
+                SwapOperation::PalomadexSwap {
                     offer_asset_info: AssetInfo::Token("asset0001".to_string()),
                     ask_asset_info: AssetInfo::Native("uluna".to_string()),
                 },
@@ -646,15 +633,15 @@ mod testing {
         assert!(assert_operations(
             deps.as_ref().api,
             &[
-                SwapOperation::WyndexSwap {
+                SwapOperation::PalomadexSwap {
                     offer_asset_info: AssetInfo::Native("ukrw".to_string()),
                     ask_asset_info: AssetInfo::Token("asset0001".to_string()),
                 },
-                SwapOperation::WyndexSwap {
+                SwapOperation::PalomadexSwap {
                     offer_asset_info: AssetInfo::Token("asset0001".to_string()),
                     ask_asset_info: AssetInfo::Native("uluna".to_string()),
                 },
-                SwapOperation::WyndexSwap {
+                SwapOperation::PalomadexSwap {
                     offer_asset_info: AssetInfo::Native("uluna".to_string()),
                     ask_asset_info: AssetInfo::Token("asset0002".to_string()),
                 },
@@ -666,15 +653,15 @@ mod testing {
         assert!(assert_operations(
             deps.as_ref().api,
             &[
-                SwapOperation::WyndexSwap {
+                SwapOperation::PalomadexSwap {
                     offer_asset_info: AssetInfo::Native("ukrw".to_string()),
                     ask_asset_info: AssetInfo::Token("asset0001".to_string()),
                 },
-                SwapOperation::WyndexSwap {
+                SwapOperation::PalomadexSwap {
                     offer_asset_info: AssetInfo::Token("asset0001".to_string()),
                     ask_asset_info: AssetInfo::Native("uaud".to_string()),
                 },
-                SwapOperation::WyndexSwap {
+                SwapOperation::PalomadexSwap {
                     offer_asset_info: AssetInfo::Native("uluna".to_string()),
                     ask_asset_info: AssetInfo::Token("asset0002".to_string()),
                 },

@@ -25,7 +25,7 @@ pub struct MigrateMsg {
 pub struct OrigMigrateMsg {
     /// This is the address that can run ExecuteMsg::MigrateTokens
     pub migrator: String,
-    /// This is how long it will be staked on WYND DEX
+    /// This is how long it will be staked on PALOMA DEX
     pub unbonding_period: u64,
 
     /// This is the junoswap pool where the LP will be withdrawn from
@@ -34,16 +34,16 @@ pub struct OrigMigrateMsg {
     /// Can be deposited in any pool created by this factory
     pub factory: String,
     /// If set, only can be deposited in this pool (which must also be created by the factory)
-    pub wynddex_pool: Option<String>,
-    // Multiplier applied on amount of RAW to get WYND tokens.
+    pub palomadex_pool: Option<String>,
+    // Multiplier applied on amount of RAW to get Grain tokens.
     // Example:
     // exchange_rate = 1.5
-    // 10 RAW * exchange_rate = 15 WYND
-    pub raw_to_wynd_exchange_rate: Decimal,
+    // 10 RAW * exchange_rate = 15 PALOMA
+    pub raw_to_grain_exchange_rate: Decimal,
     // Address of cw20 RAW token
     pub raw_address: String,
-    // Address of cw20 WYND token
-    pub wynd_address: String,
+    // Address of cw20 Grain token
+    pub grain_address: String,
 }
 
 #[cw_serde]
@@ -52,7 +52,7 @@ pub enum ExecuteMsg {
     /// This moves the LP tokens to this contract, which are later given to the stakers in `MigrateStakers`.
     /// Must be called by migrator.
     /// Target pool must match constraints above
-    MigrateTokens { wynddex_pool: String },
+    MigrateTokens { palomadex_pool: String },
 
     /// Give the next `limit` stakers their LP tokens.
     /// Must be called by migrator.

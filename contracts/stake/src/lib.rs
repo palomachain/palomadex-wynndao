@@ -1,6 +1,6 @@
 //#![warn(missing_docs)]
 #![doc(html_logo_url = "../../../uml/logo.png")]
-//! # WYNDEX Staking
+//! # PALOMADEX Staking
 //!
 //! ## Description
 //!
@@ -8,7 +8,7 @@
 //!
 //! ## Objectives
 //!
-//! The main goal of the **WYNDEX staking** is to:
+//! The main goal of the **PALOMADEX staking** is to:
 //!   - Allow the LP TOKEN to be staked with a proper curve and time.
 //!
 

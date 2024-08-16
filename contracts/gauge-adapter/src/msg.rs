@@ -1,6 +1,6 @@
 use cosmwasm_schema::{cw_serde, QueryResponses};
 use cosmwasm_std::{CosmosMsg, Decimal, Uint128};
-use wyndex::asset::Asset;
+use palomadex::asset::Asset;
 
 #[cw_serde]
 pub struct InstantiateMsg {

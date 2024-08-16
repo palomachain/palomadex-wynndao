@@ -1,7 +1,7 @@
 use cosmwasm_std::{coin, testing::mock_env};
+use palomadex::asset::{AssetInfo, AssetInfoExt};
+use palomadex_multi_hop::msg::SwapOperation;
 use tests::SuiteBuilder;
-use wyndex::asset::{AssetInfo, AssetInfoExt};
-use wyndex_multi_hop::msg::SwapOperation;
 
 #[test]
 fn trading_frozen() {
@@ -19,7 +19,7 @@ fn trading_frozen() {
 
     suite
         .create_pair_and_provide_liquidity(
-            wyndex::factory::PairType::Xyk {},
+            palomadex::factory::PairType::Xyk {},
             (ujuno_info.clone(), 1_000_000),
             (uluna_info.clone(), 1_000_000),
             vec![coin(1_000_000, ujuno), coin(1_000_000, uluna)],
@@ -30,7 +30,7 @@ fn trading_frozen() {
         .swap_operations(
             user,
             coin(1000, ujuno),
-            vec![SwapOperation::WyndexSwap {
+            vec![SwapOperation::PalomadexSwap {
                 ask_asset_info: uluna_info.clone(),
                 offer_asset_info: ujuno_info.clone(),
             }],
@@ -46,7 +46,7 @@ fn trading_frozen() {
         .swap_operations(
             user,
             coin(1000, ujuno),
-            vec![SwapOperation::WyndexSwap {
+            vec![SwapOperation::PalomadexSwap {
                 ask_asset_info: uluna_info,
                 offer_asset_info: ujuno_info,
             }],
@@ -70,7 +70,7 @@ fn custom_fee_works() {
     let pair = suite
         .create_pair(
             &suite.owner.clone(),
-            wyndex::factory::PairType::Xyk {},
+            palomadex::factory::PairType::Xyk {},
             [ujuno_info.clone(), uluna_info.clone()],
             None,
             5_000.into(), // 50% fee for this pair
@@ -93,7 +93,7 @@ fn custom_fee_works() {
         .swap_operations(
             user,
             coin(1000, ujuno),
-            vec![SwapOperation::WyndexSwap {
+            vec![SwapOperation::PalomadexSwap {
                 ask_asset_info: uluna_info,
                 offer_asset_info: ujuno_info,
             }],

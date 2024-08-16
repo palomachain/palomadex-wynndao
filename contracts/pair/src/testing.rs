@@ -9,21 +9,21 @@ use cw_utils::MsgInstantiateContractResponse;
 use proptest::prelude::*;
 
 use cw20_base::msg::InstantiateMsg as TokenInstantiateMsg;
-use wyndex::asset::{
+use palomadex::asset::{
     Asset, AssetInfo, AssetInfoValidated, AssetValidated, MINIMUM_LIQUIDITY_AMOUNT,
 };
-use wyndex::factory::PairType;
-use wyndex::fee_config::FeeConfig;
-use wyndex::oracle::{SamplePeriod, TwapResponse};
-use wyndex::pair::{
+use palomadex::factory::PairType;
+use palomadex::fee_config::FeeConfig;
+use palomadex::oracle::{SamplePeriod, TwapResponse};
+use palomadex::pair::{
     assert_max_spread, ContractError, Cw20HookMsg, ExecuteMsg, InstantiateMsg, PairInfo,
     PoolResponse, ReverseSimulationResponse, SimulationResponse, StakeConfig, TWAP_PRECISION,
 };
-use wyndex::pair::{MigrateMsg, QueryMsg};
+use palomadex::pair::{MigrateMsg, QueryMsg};
 
 use crate::contract::{
-    accumulate_prices, compute_swap, execute, instantiate, migrate, query_pool,
-    query_reverse_simulation, query_share, query_simulation,
+    accumulate_prices, compute_swap, execute, instantiate, query_pool, query_reverse_simulation,
+    query_share, query_simulation,
 };
 use crate::contract::{compute_offer_amount, query};
 use crate::state::{Config, CONFIG};
@@ -37,7 +37,7 @@ fn store_liquidity_token(deps: DepsMut, contract_addr: String) {
     };
 
     let mut config = CONFIG.load(deps.storage).unwrap();
-    let _res = wyndex::pair::instantiate_lp_token_reply(
+    let _res = palomadex::pair::instantiate_lp_token_reply(
         &deps,
         res,
         &config.factory_addr,
@@ -108,7 +108,7 @@ fn proper_initialization() {
                 .unwrap(),
                 funds: vec![],
                 admin: Some("owner".to_owned()),
-                label: String::from("Wyndex LP token"),
+                label: String::from("Palomadex LP token"),
             }
             .into(),
             id: 1,
@@ -239,17 +239,6 @@ fn test_freezing_a_pool_blocking_actions_then_unfreeze() {
             )],
         ),
     ]);
-
-    // Migrate with the freeze migrate message
-    migrate(
-        deps.as_mut(),
-        env.clone(),
-        MigrateMsg::UpdateFreeze {
-            frozen: true,
-            circuit_breaker: Some("addr0000".to_string()),
-        },
-    )
-    .unwrap();
 
     // Failing Execute Actions due to frozen
 
@@ -940,7 +929,7 @@ fn withdraw_liquidity() {
     store_liquidity_token(deps.as_mut(), "liquidity0000".to_string());
 
     // need to initialize oracle, because we don't call `provide_liquidity` in this test
-    wyndex::oracle::initialize_oracle(
+    palomadex::oracle::initialize_oracle(
         &mut deps.storage,
         &mock_env_with_block_time(0),
         Decimal::one(),
@@ -1230,7 +1219,7 @@ fn try_native_to_token() {
     store_liquidity_token(deps.as_mut(), "liquidity0000".to_string());
 
     // need to initialize oracle, because we don't call `provide_liquidity` in this test
-    wyndex::oracle::initialize_oracle(
+    palomadex::oracle::initialize_oracle(
         &mut deps.storage,
         &mock_env_with_block_time(0),
         Decimal::one(),
@@ -1448,7 +1437,7 @@ fn try_token_to_native() {
     store_liquidity_token(deps.as_mut(), "liquidity0000".to_string());
 
     // need to initialize oracle, because we don't call `provide_liquidity` in this test
-    wyndex::oracle::initialize_oracle(
+    palomadex::oracle::initialize_oracle(
         &mut deps.storage,
         &mock_env_with_block_time(0),
         Decimal::one(),

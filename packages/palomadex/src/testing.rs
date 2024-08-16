@@ -200,10 +200,10 @@ fn test_asset() {
 }
 
 #[test]
-fn query_wyndex_pair_contract() {
+fn query_palomadex_pair_contract() {
     let mut deps = mock_dependencies(&[]);
 
-    deps.querier.with_wyndex_pairs(&[(
+    deps.querier.with_palomadex_pairs(&[(
         &"asset0000uusd".to_string(),
         &PairInfo {
             asset_infos: vec![
@@ -238,7 +238,7 @@ fn query_wyndex_pair_contract() {
 #[test]
 fn test_format_lp_token_name() {
     let mut deps = mock_dependencies(&[]);
-    deps.querier.with_wyndex_pairs(&[(
+    deps.querier.with_palomadex_pairs(&[(
         &"asset0000uusd".to_string(),
         &PairInfo {
             asset_infos: vec![

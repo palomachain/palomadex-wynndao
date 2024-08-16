@@ -6,25 +6,25 @@ use cw20::{BalanceResponse, Cw20ExecuteMsg, Cw20QueryMsg, MinterResponse};
 use cw20_base::msg::InstantiateMsg as Cw20BaseInstantiateMsg;
 use cw_multi_test::{App, AppResponse, BankSudo, ContractWrapper, Executor, SudoMsg};
 
-use wyndex::asset::{Asset, AssetInfo};
-use wyndex::factory::{
+use palomadex::asset::{Asset, AssetInfo};
+use palomadex::factory::{
     DefaultStakeConfig, DistributionFlow, ExecuteMsg as FactoryExecuteMsg,
     InstantiateMsg as FactoryInstantiateMsg, PairConfig, PairType, PartialStakeConfig,
     QueryMsg as FactoryQueryMsg,
 };
-use wyndex::fee_config::FeeConfig;
-use wyndex::pair::{ExecuteMsg as PairExecuteMsg, PairInfo};
-use wyndex::stake::UnbondingPeriod;
-use wyndex_multi_hop::msg::{
+use palomadex::fee_config::FeeConfig;
+use palomadex::pair::{ExecuteMsg as PairExecuteMsg, PairInfo};
+use palomadex::stake::UnbondingPeriod;
+use palomadex_multi_hop::msg::{
     ExecuteMsg, InstantiateMsg, QueryMsg, SimulateSwapOperationsResponse, SwapOperation,
 };
-use wyndex_stake::msg::ExecuteMsg as StakeExecuteMsg;
+use palomadex_stake::msg::ExecuteMsg as StakeExecuteMsg;
 
 fn store_multi_hop(app: &mut App) -> u64 {
     let contract = Box::new(ContractWrapper::new_with_empty(
-        wyndex_multi_hop::contract::execute,
-        wyndex_multi_hop::contract::instantiate,
-        wyndex_multi_hop::contract::query,
+        palomadex_multi_hop::contract::execute,
+        palomadex_multi_hop::contract::instantiate,
+        palomadex_multi_hop::contract::query,
     ));
 
     app.store_code(contract)
@@ -33,11 +33,11 @@ fn store_multi_hop(app: &mut App) -> u64 {
 fn store_factory(app: &mut App) -> u64 {
     let contract = Box::new(
         ContractWrapper::new_with_empty(
-            wyndex_factory::contract::execute,
-            wyndex_factory::contract::instantiate,
-            wyndex_factory::contract::query,
+            palomadex_factory::contract::execute,
+            palomadex_factory::contract::instantiate,
+            palomadex_factory::contract::query,
         )
-        .with_reply_empty(wyndex_factory::contract::reply),
+        .with_reply_empty(palomadex_factory::contract::reply),
     );
 
     app.store_code(contract)
@@ -46,11 +46,11 @@ fn store_factory(app: &mut App) -> u64 {
 fn store_pair(app: &mut App) -> u64 {
     let contract = Box::new(
         ContractWrapper::new_with_empty(
-            wyndex_pair::contract::execute,
-            wyndex_pair::contract::instantiate,
-            wyndex_pair::contract::query,
+            palomadex_pair::contract::execute,
+            palomadex_pair::contract::instantiate,
+            palomadex_pair::contract::query,
         )
-        .with_reply_empty(wyndex_pair::contract::reply),
+        .with_reply_empty(palomadex_pair::contract::reply),
     );
 
     app.store_code(contract)
@@ -58,9 +58,9 @@ fn store_pair(app: &mut App) -> u64 {
 
 fn store_staking(app: &mut App) -> u64 {
     let contract = Box::new(ContractWrapper::new(
-        wyndex_stake::contract::execute,
-        wyndex_stake::contract::instantiate,
-        wyndex_stake::contract::query,
+        palomadex_stake::contract::execute,
+        palomadex_stake::contract::instantiate,
+        palomadex_stake::contract::query,
     ));
 
     app.store_code(contract)
@@ -172,7 +172,7 @@ impl SuiteBuilder {
                     trading_starts: self.trading_starts,
                 },
                 &[],
-                "Wyndex Factory",
+                "Palomadex Factory",
                 None,
             )
             .unwrap();
@@ -183,10 +183,10 @@ impl SuiteBuilder {
                 multi_hop_code_id,
                 owner.clone(),
                 &InstantiateMsg {
-                    wyndex_factory: factory.to_string(),
+                    palomadex_factory: factory.to_string(),
                 },
                 &[],
-                "Wyndex Multi Hop",
+                "Palomadex Multi Hop",
                 None,
             )
             .unwrap();

@@ -8,30 +8,29 @@ use cosmwasm_std::{
     Decimal256, Deps, DepsMut, Empty, Env, Fraction, MessageInfo, QuerierWrapper, Reply, Response,
     StdError, StdResult, Uint128, Uint256, WasmMsg,
 };
-use cw2::set_contract_version;
 use cw20::{Cw20ExecuteMsg, Cw20ReceiveMsg};
 use itertools::Itertools;
 
-use wyndex::asset::{
+use palomadex::asset::{
     addr_opt_validate, check_swap_parameters, Asset, AssetInfo, AssetInfoValidated, AssetValidated,
     Decimal256Ext, DecimalAsset, MINIMUM_LIQUIDITY_AMOUNT,
 };
-use wyndex::common::{claim_ownership, drop_ownership_proposal, propose_new_owner};
-use wyndex::factory::PairType;
-use wyndex::fee_config::FeeConfig;
-use wyndex::pair::{
+use palomadex::common::{claim_ownership, drop_ownership_proposal, propose_new_owner};
+use palomadex::factory::PairType;
+use palomadex::fee_config::FeeConfig;
+use palomadex::pair::{
     add_referral, assert_max_spread, check_asset_infos, check_assets, check_cw20_in_pool,
     create_lp_token, get_share_in_assets, handle_referral, handle_reply, migration_check,
     mint_token_message, save_tmp_staking_config, take_referral, ConfigResponse, Cw20HookMsg,
     InstantiateMsg, MigrateMsg, SpotPricePredictionResponse, SpotPriceResponse, StablePoolParams,
     StablePoolUpdateParams,
 };
-use wyndex::pair::{
+use palomadex::pair::{
     CumulativePricesResponse, ExecuteMsg, PairInfo, PoolResponse, QueryMsg,
     ReverseSimulationResponse, SimulationResponse, StablePoolConfig,
 };
-use wyndex::querier::{query_factory_config, query_fee_info, query_supply};
-use wyndex::DecimalCheckedOps;
+use palomadex::querier::{query_factory_config, query_fee_info, query_supply};
+use palomadex::DecimalCheckedOps;
 
 use crate::math::{
     calc_y, compute_d, AMP_PRECISION, MAX_AMP, MAX_AMP_CHANGE, MIN_AMP_CHANGING_TIME,
@@ -45,12 +44,7 @@ use crate::utils::{
     accumulate_prices, adjust_precision, calc_new_price_a_per_b, calc_spot_price,
     compute_current_amp, compute_swap, find_spot_price, select_pools, SwapResult,
 };
-use wyndex::pair::ContractError;
-
-/// Contract name that is used for migration.
-const CONTRACT_NAME: &str = "wyndex-pair-lsd";
-/// Contract version that is used for migration.
-const CONTRACT_VERSION: &str = env!("CARGO_PKG_VERSION");
+use palomadex::pair::ContractError;
 
 const WEEK: u64 = 7 * 24 * 60 * 60;
 
@@ -96,8 +90,6 @@ pub fn instantiate(
     } else {
         None
     };
-
-    set_contract_version(deps.storage, CONTRACT_NAME, CONTRACT_VERSION)?;
 
     let greatest_precision = store_precisions(deps.branch(), &asset_infos)?;
 
@@ -606,9 +598,9 @@ pub fn provide_liquidity(
 
     if total_share.is_zero() {
         // initialize oracle storage
-        wyndex::oracle::initialize_oracle(deps.storage, &env, new_price)?;
+        palomadex::oracle::initialize_oracle(deps.storage, &env, new_price)?;
     } else {
-        wyndex::oracle::store_oracle_price(deps.storage, &env, new_price)?;
+        palomadex::oracle::store_oracle_price(deps.storage, &env, new_price)?;
     }
 
     if accumulate_prices(deps.as_ref(), &env, &mut config, &old_pools)? || save_config {
@@ -712,7 +704,7 @@ pub fn withdraw_liquidity(
         })
         .collect::<StdResult<Vec<DecimalAsset>>>()?;
     let new_price = calc_new_price_a_per_b(deps.as_ref(), &env, &config, &new_pools)?;
-    wyndex::oracle::store_oracle_price(deps.storage, &env, new_price)?;
+    palomadex::oracle::store_oracle_price(deps.storage, &env, new_price)?;
 
     if accumulate_prices(deps.as_ref(), &env, &mut config, &old_pools)? || save_config {
         CONFIG.save(deps.storage, &config)?;
@@ -1020,7 +1012,7 @@ pub fn swap(
         })
         .collect::<StdResult<Vec<_>>>()?;
     let new_price = calc_new_price_a_per_b(deps.as_ref(), &env, &config, &new_pools)?;
-    wyndex::oracle::store_oracle_price(deps.storage, &env, new_price)?;
+    palomadex::oracle::store_oracle_price(deps.storage, &env, new_price)?;
 
     if accumulate_prices(deps.as_ref(), &env, &mut config, &pools)? || save_config {
         CONFIG.save(deps.storage, &config)?;
@@ -1129,7 +1121,7 @@ pub fn query(deps: Deps, env: Env, msg: QueryMsg) -> StdResult<Binary> {
             duration,
             start_age,
             end_age,
-        } => to_binary(&wyndex::oracle::query_oracle_range(
+        } => to_binary(&palomadex::oracle::query_oracle_range(
             deps.storage,
             &env,
             &CONFIG.load(deps.storage)?.pair_info.asset_infos,

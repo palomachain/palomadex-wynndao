@@ -2,22 +2,20 @@ use cosmwasm_std::{
     attr, entry_point, from_binary, to_binary, Addr, Binary, CosmosMsg, Decimal, Deps, DepsMut,
     Env, MessageInfo, Order, Reply, ReplyOn, Response, StdError, StdResult, SubMsg, WasmMsg,
 };
-use cw2::set_contract_version;
 use cw20::Cw20ReceiveMsg;
-use cw_utils::ensure_from_older_version;
 
-use wyndex::asset::{addr_opt_validate, Asset, AssetInfo};
-use wyndex::common::{
+use palomadex::asset::{addr_opt_validate, Asset, AssetInfo};
+use palomadex::common::{
     claim_ownership, drop_ownership_proposal, propose_new_owner, validate_addresses,
 };
-use wyndex::factory::{
+use palomadex::factory::{
     ConfigResponse, DistributionFlow, ExecuteMsg, FeeInfoResponse, InstantiateMsg, MigrateMsg,
     PairConfig, PairType, PairsResponse, PartialDefaultStakeConfig, PartialStakeConfig, QueryMsg,
     ReceiveMsg, ROUTE,
 };
-use wyndex::fee_config::FeeConfig;
-use wyndex::stake::UnbondingPeriod;
-use wyndex_stake::msg::ExecuteMsg as StakeExecuteMsg;
+use palomadex::fee_config::FeeConfig;
+use palomadex::stake::UnbondingPeriod;
+use palomadex_stake::msg::ExecuteMsg as StakeExecuteMsg;
 
 use crate::error::ContractError;
 use crate::querier::query_pair_info;
@@ -30,12 +28,9 @@ use crate::state::{
 use itertools::Itertools;
 use std::collections::HashSet;
 
-use cw_placeholder::contract::CONTRACT_NAME as PLACEHOLDER_CONTRACT_NAME;
-use wyndex::pair::{ExecuteMsg as PairExecuteMsg, InstantiateMsg as PairInstantiateMsg, PairInfo};
-/// Contract name that is used for migration.
-const CONTRACT_NAME: &str = "wyndex-factory";
-/// Contract version that is used for migration.
-const CONTRACT_VERSION: &str = env!("CARGO_PKG_VERSION");
+use palomadex::pair::{
+    ExecuteMsg as PairExecuteMsg, InstantiateMsg as PairInstantiateMsg, PairInfo,
+};
 /// A `reply` call code ID used in a sub-message.
 const INSTANTIATE_PAIR_REPLY_ID: u64 = 1;
 
@@ -53,8 +48,6 @@ pub fn instantiate(
     _info: MessageInfo,
     msg: InstantiateMsg,
 ) -> Result<Response, ContractError> {
-    set_contract_version(deps.storage, CONTRACT_NAME, CONTRACT_VERSION)?;
-
     if msg.max_referral_commission > Decimal::one() {
         return Err(ContractError::InvalidReferralCommission(
             msg.max_referral_commission,
@@ -540,7 +533,7 @@ pub fn execute_create_pair(
                 circuit_breaker: None,
             })?,
             funds: vec![],
-            label: "Wyndex pair".to_string(),
+            label: "Palomadex pair".to_string(),
         }
         .into(),
         gas_limit: None,
@@ -643,7 +636,7 @@ pub mod reply {
                 SubMsg::new(
                     wasm_execute(
                         &pair_info.staking_addr,
-                        &wyndex_stake::msg::ExecuteMsg::CreateDistributionFlow {
+                        &palomadex_stake::msg::ExecuteMsg::CreateDistributionFlow {
                             manager: env.contract.address.to_string(),
                             asset: flow.asset,
                             rewards: flow.rewards,
@@ -720,10 +713,10 @@ pub fn deregister_pool_and_staking(
 /// ## Queries
 /// * **QueryMsg::Config {}** Returns general contract parameters using a custom [`ConfigResponse`] structure.
 ///
-/// * **QueryMsg::Pair { asset_infos }** Returns a [`PairInfo`] object with information about a specific Wyndex pair.
+/// * **QueryMsg::Pair { asset_infos }** Returns a [`PairInfo`] object with information about a specific Palomadex pair.
 ///
 /// * **QueryMsg::Pairs { start_after, limit }** Returns an array that contains items of type [`PairInfo`].
-/// This returns information about multiple Wyndex pairs
+/// This returns information about multiple Palomadex pairs
 ///
 /// * **QueryMsg::FeeInfo { pair_type }** Returns the fee structure (total and protocol fees) for a specific pair type.
 ///
@@ -825,44 +818,4 @@ pub fn query_fee_info(deps: Deps, pair_type: PairType) -> StdResult<FeeInfoRespo
         total_fee_bps: pair_config.fee_config.total_fee_bps,
         protocol_fee_bps: pair_config.fee_config.protocol_fee_bps,
     })
-}
-
-/// Manages the contract migration.
-#[cfg_attr(not(feature = "library"), entry_point)]
-pub fn migrate(deps: DepsMut, env: Env, msg: MigrateMsg) -> Result<Response, ContractError> {
-    match msg {
-        MigrateMsg::Init(msg) => {
-            // Enforce previous contract name was crates.io:cw-placeholder
-            let ver = cw2::get_contract_version(deps.storage)?;
-            if ver.contract != PLACEHOLDER_CONTRACT_NAME {
-                return Err(ContractError::NotPlaceholder);
-            }
-
-            // Gather contract info to pass admin
-            let contract_info = deps
-                .querier
-                .query_wasm_contract_info(env.contract.address.clone())?;
-            let contract_addr = deps
-                .api
-                .addr_validate(contract_info.admin.unwrap().as_str())?;
-            instantiate(
-                deps,
-                env,
-                MessageInfo {
-                    sender: contract_addr,
-                    funds: vec![],
-                },
-                msg,
-            )
-            .unwrap();
-        }
-        MigrateMsg::Update() => {
-            ensure_from_older_version(deps.storage, CONTRACT_NAME, CONTRACT_VERSION)?;
-        }
-        MigrateMsg::AddPermissionlessPoolDeposit(asset) => {
-            PERMISSIONLESS_DEPOSIT.save(deps.storage, &asset)?;
-        }
-    };
-
-    Ok(Response::new())
 }

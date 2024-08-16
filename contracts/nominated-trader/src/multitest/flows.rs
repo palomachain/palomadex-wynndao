@@ -11,8 +11,8 @@ mod fail_cases {
     use crate::multitest::suite::SuiteBuilder;
 
     use cosmwasm_std::{Addr, Uint128};
-    use wyndex::asset::token_asset_info;
-    use wyndex::asset::AssetInfo;
+    use palomadex::asset::token_asset_info;
+    use palomadex::asset::AssetInfo;
 
     #[test]
     fn collect_without_any_routes() {
@@ -20,9 +20,9 @@ mod fail_cases {
 
         let owner = suite.owner.clone();
 
-        let token = suite.instantiate_token(&owner, "wynd");
+        let token = suite.instantiate_token(&owner, "grain");
 
-        let token_to_swap = suite.instantiate_token(&owner, "notwynd");
+        let token_to_swap = suite.instantiate_token(&owner, "notgrain");
 
         let nominated_trader_contract = suite
             .setup_trader(
@@ -64,9 +64,9 @@ mod fail_cases {
 
         let owner = suite.owner.clone();
 
-        let token = suite.instantiate_token(&owner, "wynd");
+        let token = suite.instantiate_token(&owner, "grain");
 
-        let token_to_swap = suite.instantiate_token(&owner, "notwynd");
+        let token_to_swap = suite.instantiate_token(&owner, "notgrain");
 
         let nominated_trader_contract = suite
             .setup_trader(
@@ -110,9 +110,9 @@ mod fail_cases {
 
         let owner = suite.owner.clone();
 
-        let token = suite.instantiate_token(&owner, "wynd");
+        let token = suite.instantiate_token(&owner, "grain");
 
-        let token_to_swap = suite.instantiate_token(&owner, "notwynd");
+        let token_to_swap = suite.instantiate_token(&owner, "notgrain");
 
         let nominated_trader_contract = suite
             .setup_trader(
@@ -156,9 +156,9 @@ mod fail_cases {
 
         let owner = suite.owner.clone();
 
-        let token = suite.instantiate_token(&owner, "wynd");
+        let token = suite.instantiate_token(&owner, "grain");
 
-        let token_to_swap = suite.instantiate_token(&owner, "notwynd");
+        let token_to_swap = suite.instantiate_token(&owner, "notgrain");
 
         let nominated_trader_contract = suite
             .setup_trader(
@@ -206,9 +206,9 @@ mod fail_cases {
 
         let owner = suite.owner.clone();
 
-        let token = suite.instantiate_token(&owner, "wynd");
+        let token = suite.instantiate_token(&owner, "grain");
 
-        let token_to_swap = suite.instantiate_token(&owner, "notwynd");
+        let token_to_swap = suite.instantiate_token(&owner, "notgrain");
 
         let nominated_trader_contract = suite
             .setup_trader(
@@ -242,8 +242,8 @@ mod trader_flows {
     use crate::multitest::suite::SuiteBuilder;
 
     use cosmwasm_std::{assert_approx_eq, coin, Addr, Uint128};
-    use wyndex::asset::{native_asset_info, token_asset_info};
-    use wyndex::{asset::AssetInfo, factory::PairType};
+    use palomadex::asset::{native_asset_info, token_asset_info};
+    use palomadex::{asset::AssetInfo, factory::PairType};
 
     #[test]
     // This test ensures that an owner can both add and remove assets as designated routes
@@ -255,9 +255,9 @@ mod trader_flows {
 
         let owner = suite.owner.clone();
 
-        let token = suite.instantiate_token(&owner, "wynd");
+        let token = suite.instantiate_token(&owner, "grain");
 
-        let token_to_swap = suite.instantiate_token(&owner, "notwynd");
+        let token_to_swap = suite.instantiate_token(&owner, "notgrain");
 
         let nominated_trader_contract = suite
             .setup_trader(
@@ -378,7 +378,7 @@ mod trader_flows {
 
         let owner = suite.owner.clone();
 
-        let token_to_swap = suite.instantiate_token(&owner, "notwynd");
+        let token_to_swap = suite.instantiate_token(&owner, "notgrain");
 
         let nominated_trader_contract = suite
             .setup_trader(
@@ -451,9 +451,9 @@ mod trader_flows {
 
         let owner = suite.owner.clone();
 
-        let token = suite.instantiate_token(&owner, "wynd");
+        let token = suite.instantiate_token(&owner, "grain");
 
-        let token_to_swap = suite.instantiate_token(&owner, "notwynd");
+        let token_to_swap = suite.instantiate_token(&owner, "notgrain");
 
         let nominated_trader_contract = suite
             .setup_trader(
@@ -557,8 +557,8 @@ mod trader_flows {
 
         let owner = suite.owner.clone();
 
-        let token = suite.instantiate_token(&owner, "wynd");
-        let token_to_swap = suite.instantiate_token(&owner, "notwynd");
+        let token = suite.instantiate_token(&owner, "grain");
+        let token_to_swap = suite.instantiate_token(&owner, "notgrain");
 
         let nominated_trader_contract = suite
             .setup_trader(
@@ -669,7 +669,7 @@ mod trader_flows {
 
         let owner = suite.owner.clone();
 
-        let token = suite.instantiate_token(&owner, "wynd");
+        let token = suite.instantiate_token(&owner, "grain");
 
         let nominated_trader_contract = suite
             .setup_trader(
@@ -720,9 +720,9 @@ mod trader_flows {
 
         let owner = suite.owner.clone();
 
-        let token = suite.instantiate_token(&owner, "wynd");
+        let token = suite.instantiate_token(&owner, "grain");
 
-        let token_to_swap = suite.instantiate_token(&owner, "notwynd");
+        let token_to_swap = suite.instantiate_token(&owner, "notgrain");
 
         let bridge = suite.instantiate_token(&owner, "bridge");
 

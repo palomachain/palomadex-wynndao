@@ -1,5 +1,5 @@
 use cosmwasm_schema::write_api;
-use wyndex_multi_hop::msg::{ExecuteMsg, InstantiateMsg, QueryMsg};
+use palomadex_multi_hop::msg::{ExecuteMsg, InstantiateMsg, QueryMsg};
 
 fn main() {
     write_api! {

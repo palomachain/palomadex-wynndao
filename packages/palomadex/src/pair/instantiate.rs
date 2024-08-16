@@ -52,7 +52,7 @@ pub fn create_lp_token(
                 marketing: None,
             })?,
             funds: vec![],
-            label: "Wyndex LP token".to_owned(),
+            label: "Palomadex LP token".to_owned(),
         },
         INSTANTIATE_TOKEN_REPLY_ID,
     ))

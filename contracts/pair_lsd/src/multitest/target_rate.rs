@@ -2,8 +2,8 @@ use std::str::FromStr;
 
 use cosmwasm_std::{assert_approx_eq, coin, Addr, Decimal, Fraction, Uint128};
 use cw_multi_test::{BankSudo, SudoMsg};
-use wyndex::pair::LsdInfo;
-use wyndex::{
+use palomadex::pair::LsdInfo;
+use palomadex::{
     asset::{AssetInfo, AssetInfoExt},
     factory::PairType,
     pair::StablePoolParams,

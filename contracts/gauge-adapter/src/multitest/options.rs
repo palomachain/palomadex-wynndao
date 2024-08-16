@@ -1,5 +1,5 @@
 use cosmwasm_std::Addr;
-use wyndex::asset::AssetInfo;
+use palomadex::asset::AssetInfo;
 
 use crate::multitest::suite::SuiteBuilder;
 

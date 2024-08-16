@@ -1,6 +1,6 @@
 use cosmwasm_std::{QuerierWrapper, StdResult};
-use wyndex::factory::PairsResponse;
-use wyndex::factory::QueryMsg;
+use palomadex::factory::PairsResponse;
+use palomadex::factory::QueryMsg;
 
 /// Returns a list of all pairs
 pub fn query_pairs(

@@ -11,8 +11,8 @@ cosmwasm-std = { workspace = true }
 cw-multi-test = { workspace = true }
 cw20 = { workspace = true }
 cw20-base = { workspace = true }
-wyndex = { workspace = true }
-wyndex-factory = { workspace = true }
-wyndex-multi-hop = { workspace = true }
-wyndex-pair = { workspace = true }
-wyndex-stake = { workspace = true }
+palomadex = { workspace = true }
+palomadex-factory = { workspace = true }
+palomadex-multi-hop = { workspace = true }
+palomadex-pair = { workspace = true }
+palomadex-stake = { workspace = true }

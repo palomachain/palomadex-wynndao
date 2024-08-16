@@ -26,11 +26,11 @@ jobs:
             artifacts/gauge_adapter.wasm
             artifacts/lp_converter.wasm
             artifacts/nominated_trader.wasm
-            artifacts/wyndex_multi_hop.wasm
-            artifacts/wyndex_stake.wasm
+            artifacts/palomadex_multi_hop.wasm
+            artifacts/palomadex_stake.wasm
             artifacts/checksums.txt
             artifacts/raw_migration.wasm
-            artifacts/wyndex_pair_lsd.wasm
+            artifacts/palomadex_pair_lsd.wasm
             artifacts/junoswap_staking.wasm
-            artifacts/wyndex_factory.wasm
-            artifacts/wyndex_pair.wasm
+            artifacts/palomadex_factory.wasm
+            artifacts/palomadex_pair.wasm

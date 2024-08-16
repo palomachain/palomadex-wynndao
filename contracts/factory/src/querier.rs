@@ -1,6 +1,6 @@
 use cosmwasm_std::{QuerierWrapper, StdResult};
-use wyndex::pair::PairInfo;
-use wyndex::pair::QueryMsg;
+use palomadex::pair::PairInfo;
+use palomadex::pair::QueryMsg;
 
 /// Returns information about a pair (using the [`PairInfo`] struct).
 ///

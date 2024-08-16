@@ -14,7 +14,7 @@ use std::fmt::{Display, Formatter, Result};
 /// This enum describes available pair types.
 /// ## Available pool types
 /// ```
-/// # use wyndex::factory::PairType::{Custom, Stable, Xyk};
+/// # use palomadex::factory::PairType::{Custom, Stable, Xyk};
 /// Xyk {};
 /// Stable {};
 /// Custom(String::from("Custom"));

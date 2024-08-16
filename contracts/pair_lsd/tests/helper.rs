@@ -8,17 +8,17 @@ use cw_multi_test::{App, AppResponse, Contract, ContractWrapper, Executor};
 use derivative::Derivative;
 use itertools::Itertools;
 
-use wyndex::asset::{
+use palomadex::asset::{
     native_asset_info, token_asset_info, Asset, AssetInfo, AssetInfoValidated, AssetValidated,
 };
-use wyndex::factory::{DefaultStakeConfig, PairConfig, PairType, PartialStakeConfig};
-use wyndex::fee_config::FeeConfig;
-use wyndex::pair::{
+use palomadex::factory::{DefaultStakeConfig, PairConfig, PairType, PartialStakeConfig};
+use palomadex::fee_config::FeeConfig;
+use palomadex::pair::{
     CumulativePricesResponse, Cw20HookMsg, ExecuteMsg, PairInfo, QueryMsg,
     ReverseSimulationResponse, SimulationResponse, StablePoolParams,
 };
-use wyndex::querier::NATIVE_TOKEN_PRECISION;
-use wyndex_pair_lsd::contract::{execute, instantiate, query, reply};
+use palomadex::querier::NATIVE_TOKEN_PRECISION;
+use palomadex_pair_lsd::contract::{execute, instantiate, query, reply};
 
 const INIT_BALANCE: u128 = 1_000_000_000_000;
 
@@ -86,19 +86,19 @@ fn pair_contract() -> Box<dyn Contract<Empty>> {
 fn factory_contract() -> Box<dyn Contract<Empty>> {
     Box::new(
         ContractWrapper::new_with_empty(
-            wyndex_factory::contract::execute,
-            wyndex_factory::contract::instantiate,
-            wyndex_factory::contract::query,
+            palomadex_factory::contract::execute,
+            palomadex_factory::contract::instantiate,
+            palomadex_factory::contract::query,
         )
-        .with_reply_empty(wyndex_factory::contract::reply),
+        .with_reply_empty(palomadex_factory::contract::reply),
     )
 }
 
 fn stake_contract() -> Box<dyn Contract<Empty>> {
     Box::new(ContractWrapper::new_with_empty(
-        wyndex_stake::contract::execute,
-        wyndex_stake::contract::instantiate,
-        wyndex_stake::contract::query,
+        palomadex_stake::contract::execute,
+        palomadex_stake::contract::instantiate,
+        palomadex_stake::contract::query,
     ))
 }
 
@@ -148,7 +148,7 @@ impl Helper {
         let factory_code_id = app.store_code(factory_contract());
         let staking_code_id = app.store_code(stake_contract());
 
-        let init_msg = wyndex::factory::InstantiateMsg {
+        let init_msg = palomadex::factory::InstantiateMsg {
             fee_address: None,
             pair_configs: vec![PairConfig {
                 code_id: pair_code_id,
@@ -187,7 +187,7 @@ impl Helper {
             .into_iter()
             .map(|(_, asset_info)| asset_info)
             .collect_vec();
-        let init_pair_msg = wyndex::factory::ExecuteMsg::CreatePair {
+        let init_pair_msg = palomadex::factory::ExecuteMsg::CreatePair {
             pair_type: PairType::Lsd {},
             asset_infos: asset_infos.clone(),
             init_params: Some(
@@ -204,9 +204,10 @@ impl Helper {
 
         app.execute_contract(owner.clone(), factory.clone(), &init_pair_msg, &[])?;
 
-        let resp: PairInfo = app
-            .wrap()
-            .query_wasm_smart(&factory, &wyndex::factory::QueryMsg::Pair { asset_infos })?;
+        let resp: PairInfo = app.wrap().query_wasm_smart(
+            &factory,
+            &palomadex::factory::QueryMsg::Pair { asset_infos },
+        )?;
 
         Ok(Self {
             app,

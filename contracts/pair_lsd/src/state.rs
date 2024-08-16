@@ -1,9 +1,9 @@
 use cosmwasm_schema::cw_serde;
 use cosmwasm_std::{Addr, Decimal, DepsMut, StdResult, Storage, Uint128};
 use cw_storage_plus::{Item, Map};
-use wyndex::asset::AssetInfoValidated;
-use wyndex::common::OwnershipProposal;
-use wyndex::pair::PairInfo;
+use palomadex::asset::AssetInfoValidated;
+use palomadex::common::OwnershipProposal;
+use palomadex::pair::PairInfo;
 
 /// This structure stores the main stableswap pair parameters.
 #[cw_serde]

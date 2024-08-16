@@ -2,13 +2,13 @@ use anyhow::Result as AnyResult;
 use cosmwasm_std::{Addr, Binary, Decimal, Uint128};
 use cw20::MinterResponse;
 use cw_multi_test::{App, AppResponse, ContractWrapper, Executor};
-use wyndex::asset::AssetInfo;
-use wyndex::factory::{
+use palomadex::asset::AssetInfo;
+use palomadex::factory::{
     DefaultStakeConfig, PairConfig, PairType, PartialDefaultStakeConfig, PartialStakeConfig,
     QueryMsg,
 };
-use wyndex::fee_config::FeeConfig;
-use wyndex::pair::PairInfo;
+use palomadex::fee_config::FeeConfig;
+use palomadex::pair::PairInfo;
 
 pub struct FactoryHelper {
     pub owner: Addr,
@@ -57,11 +57,11 @@ impl FactoryHelper {
 
         let pair_contract = Box::new(
             ContractWrapper::new_with_empty(
-                wyndex_pair::contract::execute,
-                wyndex_pair::contract::instantiate,
-                wyndex_pair::contract::query,
+                palomadex_pair::contract::execute,
+                palomadex_pair::contract::instantiate,
+                palomadex_pair::contract::query,
             )
-            .with_reply_empty(wyndex_pair::contract::reply),
+            .with_reply_empty(palomadex_pair::contract::reply),
         );
 
         let pair_code_id = router.store_code(pair_contract);
@@ -71,24 +71,24 @@ impl FactoryHelper {
         } else {
             let factory_contract = Box::new(
                 ContractWrapper::new_with_empty(
-                    wyndex_factory::contract::execute,
-                    wyndex_factory::contract::instantiate,
-                    wyndex_factory::contract::query,
+                    palomadex_factory::contract::execute,
+                    palomadex_factory::contract::instantiate,
+                    palomadex_factory::contract::query,
                 )
-                .with_reply_empty(wyndex_factory::contract::reply),
+                .with_reply_empty(palomadex_factory::contract::reply),
             );
             router.store_code(factory_contract)
         };
 
         let staking_contract = Box::new(ContractWrapper::new_with_empty(
-            wyndex_stake::contract::execute,
-            wyndex_stake::contract::instantiate,
-            wyndex_stake::contract::query,
+            palomadex_stake::contract::execute,
+            palomadex_stake::contract::instantiate,
+            palomadex_stake::contract::query,
         ));
 
         let staking_code_id = router.store_code(staking_contract);
 
-        let msg = wyndex::factory::InstantiateMsg {
+        let msg = palomadex::factory::InstantiateMsg {
             pair_configs: vec![PairConfig {
                 code_id: pair_code_id,
                 pair_type: PairType::Xyk {},
@@ -141,7 +141,7 @@ impl FactoryHelper {
         only_owner_can_create_pairs: Option<bool>,
         default_stake_config: Option<PartialDefaultStakeConfig>,
     ) -> AnyResult<AppResponse> {
-        let msg = wyndex::factory::ExecuteMsg::UpdateConfig {
+        let msg = palomadex::factory::ExecuteMsg::UpdateConfig {
             token_code_id,
             fee_address,
             only_owner_can_create_pairs,
@@ -165,7 +165,7 @@ impl FactoryHelper {
             AssetInfo::Token(tokens[1].to_owned()),
         ];
 
-        let msg = wyndex::factory::ExecuteMsg::CreatePair {
+        let msg = palomadex::factory::ExecuteMsg::CreatePair {
             pair_type,
             asset_infos,
             init_params,
@@ -183,7 +183,7 @@ impl FactoryHelper {
         sender: &Addr,
         asset_infos: Vec<AssetInfo>,
     ) -> AnyResult<AppResponse> {
-        let msg = wyndex::factory::ExecuteMsg::Deregister { asset_infos };
+        let msg = palomadex::factory::ExecuteMsg::Deregister { asset_infos };
 
         router.execute_contract(sender.clone(), self.factory.clone(), &msg, &[])
     }
@@ -218,7 +218,7 @@ impl FactoryHelper {
         asset_infos: Vec<AssetInfo>,
         fee_config: FeeConfig,
     ) -> AnyResult<AppResponse> {
-        let msg = wyndex::factory::ExecuteMsg::UpdatePairFees {
+        let msg = palomadex::factory::ExecuteMsg::UpdatePairFees {
             asset_infos,
             fee_config,
         };

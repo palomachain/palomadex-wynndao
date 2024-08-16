@@ -1,12 +1,12 @@
 use crate::error::ContractError;
 use crate::state::{Config, ROUTES};
-use wyndex::asset::{Asset, AssetInfo};
-use wyndex::pair::PairInfo;
+use palomadex::asset::{Asset, AssetInfo};
+use palomadex::pair::PairInfo;
 
 use cosmwasm_std::{
     to_binary, Addr, Coin, Decimal, Deps, QuerierWrapper, StdResult, SubMsg, Uint128, WasmMsg,
 };
-use wyndex::pair::{Cw20HookMsg, SimulationResponse};
+use palomadex::pair::{Cw20HookMsg, SimulationResponse};
 
 /// The default route depth for a fee token
 pub const ROUTES_INITIAL_DEPTH: u64 = 0;
@@ -78,7 +78,7 @@ pub fn build_swap_msg(
 
         Ok(SubMsg::new(WasmMsg::Execute {
             contract_addr: pool.contract_addr.to_string(),
-            msg: to_binary(&wyndex::pair::ExecuteMsg::Swap {
+            msg: to_binary(&palomadex::pair::ExecuteMsg::Swap {
                 offer_asset: offer_asset.clone(),
                 ask_asset_info: to.cloned(),
                 belief_price,
@@ -119,7 +119,7 @@ pub fn build_swap_msg(
 ///
 /// * **to_token** asset we want to swap to.
 ///
-/// * **desired token** represents $WYND.
+/// * **desired token** represents $PALOMA.
 ///
 /// * **depth** current recursion depth of the validation.
 ///
@@ -189,7 +189,7 @@ pub fn get_pool(
     amount: Option<Uint128>,
 ) -> Result<(PairInfo, Option<Uint128>), ContractError> {
     // We use raw query to save gas
-    let result = wyndex::factory::ROUTE.query(
+    let result = palomadex::factory::ROUTE.query(
         querier,
         factory_contract.clone(),
         (from.to_string(), to.to_string()),
@@ -205,7 +205,7 @@ pub fn get_pool(
                     // Perform a simulation swap to get the return amount for each pool
                     let sim_res: SimulationResponse = querier.query_wasm_smart(
                         &pair_contract,
-                        &wyndex::pair::QueryMsg::Simulation {
+                        &palomadex::pair::QueryMsg::Simulation {
                             offer_asset: Asset {
                                 info: from.clone(),
                                 amount: amount.unwrap_or(SWAP_SIMULATION_AMOUNT),
@@ -226,7 +226,7 @@ pub fn get_pool(
                 .unwrap();
             // Return the best pair's PairInfo and the return amount
             Ok((
-                querier.query_wasm_smart(best_pair, &wyndex::pair::QueryMsg::Pair {})?,
+                querier.query_wasm_smart(best_pair, &palomadex::pair::QueryMsg::Pair {})?,
                 Some(sim_res.return_amount),
             ))
         }

@@ -11,8 +11,7 @@ use cosmwasm_std::{
 };
 use cw20::{BalanceResponse, Cw20ExecuteMsg, Cw20QueryMsg};
 use cw_multi_test::{App, AppResponse, Contract, ContractWrapper, Executor, StakingInfo};
-use wynd_lsd_hub::msg::{ConfigResponse, TokenInitInfo};
-use wyndex::{
+use palomadex::{
     asset::{Asset, AssetInfo, AssetInfoExt},
     factory::{
         DefaultStakeConfig, ExecuteMsg as FactoryExecuteMsg, PairConfig, PairType,
@@ -22,40 +21,40 @@ use wyndex::{
     pair::{ExecuteMsg as PairExecuteMsg, PairInfo},
     stake::{ConverterConfig, ReceiveMsg, UnbondingPeriod},
 };
-use wyndex_stake::msg::{ExecuteMsg as StakeExecuteMsg, StakedResponse};
+use palomadex_stake::msg::{ExecuteMsg as StakeExecuteMsg, StakedResponse};
+use wynd_lsd_hub::msg::{ConfigResponse, TokenInitInfo};
 
 pub const DAY: u64 = 24 * HOUR;
 pub const HOUR: u64 = 60 * 60;
 
 fn contract_factory() -> Box<dyn Contract<Empty>> {
     let contract = ContractWrapper::new_with_empty(
-        wyndex_factory::contract::execute,
-        wyndex_factory::contract::instantiate,
-        wyndex_factory::contract::query,
+        palomadex_factory::contract::execute,
+        palomadex_factory::contract::instantiate,
+        palomadex_factory::contract::query,
     )
-    .with_reply_empty(wyndex_factory::contract::reply);
+    .with_reply_empty(palomadex_factory::contract::reply);
 
     Box::new(contract)
 }
 
 fn contract_pair() -> Box<dyn Contract<Empty>> {
     let contract = ContractWrapper::new_with_empty(
-        wyndex_pair::contract::execute,
-        wyndex_pair::contract::instantiate,
-        wyndex_pair::contract::query,
+        palomadex_pair::contract::execute,
+        palomadex_pair::contract::instantiate,
+        palomadex_pair::contract::query,
     )
-    .with_reply_empty(wyndex_pair::contract::reply);
+    .with_reply_empty(palomadex_pair::contract::reply);
 
     Box::new(contract)
 }
 
 fn contract_stake() -> Box<dyn Contract<Empty>> {
     let contract = ContractWrapper::new_with_empty(
-        wyndex_stake::contract::execute,
-        wyndex_stake::contract::instantiate,
-        wyndex_stake::contract::query,
-    )
-    .with_migrate(wyndex_stake::contract::migrate);
+        palomadex_stake::contract::execute,
+        palomadex_stake::contract::instantiate,
+        palomadex_stake::contract::query,
+    );
 
     Box::new(contract)
 }
@@ -199,7 +198,7 @@ impl SuiteBuilder {
             .instantiate_contract(
                 factory_code_id,
                 owner.clone(),
-                &wyndex::factory::InstantiateMsg {
+                &palomadex::factory::InstantiateMsg {
                     pair_configs: vec![PairConfig {
                         code_id: pair_code_id,
                         pair_type: PairType::Xyk {},
@@ -553,7 +552,7 @@ impl Suite {
     pub fn migrate_staking_contract(
         &mut self,
         pair: Pair,
-        msg: wyndex_stake::msg::MigrateMsg,
+        msg: palomadex_stake::msg::MigrateMsg,
     ) -> AnyResult<AppResponse> {
         self.app.migrate_contract(
             Addr::unchecked("owner"),
@@ -571,7 +570,7 @@ impl Suite {
     ) -> AnyResult<StakedResponse> {
         Ok(self.app.wrap().query_wasm_smart(
             pair.staking_addr(self),
-            &wyndex_stake::msg::QueryMsg::Staked {
+            &palomadex_stake::msg::QueryMsg::Staked {
                 address: addr.to_string(),
                 unbonding_period,
             },
@@ -589,7 +588,7 @@ impl Suite {
         Ok(self
             .app
             .wrap()
-            .query_wasm_smart(pair.addr(self), &wyndex::pair::QueryMsg::Pair {})?)
+            .query_wasm_smart(pair.addr(self), &palomadex::pair::QueryMsg::Pair {})?)
     }
 
     pub fn query_cw20_balance(&self, address: &str, cw20: impl Into<String>) -> StdResult<u128> {

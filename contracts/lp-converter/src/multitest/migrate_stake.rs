@@ -1,5 +1,5 @@
-use wyndex::{asset::MINIMUM_LIQUIDITY_AMOUNT, stake::ConverterConfig};
-use wyndex_stake::msg::MigrateMsg;
+use palomadex::{asset::MINIMUM_LIQUIDITY_AMOUNT, stake::ConverterConfig};
+use palomadex_stake::msg::MigrateMsg;
 
 use super::suite::{juno, uusd, Pair, SuiteBuilder, DAY};
 
@@ -48,7 +48,7 @@ fn migrate_to_existing_pool() {
         .migrate_stake(Pair::Lsd, user, lsd_lp, unbonding_period)
         .unwrap_err();
     assert_eq!(
-        wyndex_stake::ContractError::NoConverter {},
+        palomadex_stake::ContractError::NoConverter {},
         err.downcast().unwrap()
     );
 
@@ -102,7 +102,7 @@ fn migrate_converter_config() {
         .migrate_stake(Pair::Native, user, native_lp, unbonding_period)
         .unwrap_err();
     assert_eq!(
-        wyndex_stake::ContractError::NoConverter {},
+        palomadex_stake::ContractError::NoConverter {},
         err.downcast().unwrap()
     );
 
