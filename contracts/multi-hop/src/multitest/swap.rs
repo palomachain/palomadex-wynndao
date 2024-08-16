@@ -2,13 +2,13 @@ use super::suite::SuiteBuilder;
 
 use cosmwasm_std::testing::MockApi;
 use cosmwasm_std::{assert_approx_eq, coin, Decimal, Fraction, Uint128};
-use wyndex::pair::{add_referral, take_referral};
-use wyndex::querier::query_factory_config;
+use palomadex::pair::{add_referral, take_referral};
+use palomadex::querier::query_factory_config;
 
 use crate::error::ContractError;
 use crate::msg::{SwapOperation, MAX_SWAP_OPERATIONS};
-use wyndex::asset::{AssetInfo, AssetInfoExt, AssetInfoValidated};
-use wyndex::factory::PairType;
+use palomadex::asset::{AssetInfo, AssetInfoExt, AssetInfoValidated};
+use palomadex::factory::PairType;
 
 #[test]
 fn must_provide_operations() {
@@ -37,7 +37,7 @@ fn single_swap() {
 
     let owner = suite.owner.clone();
 
-    let token = suite.instantiate_token(&owner, "wynd");
+    let token = suite.instantiate_token(&owner, "paloma");
 
     // create LP for just instantiated tokens
     suite
@@ -59,7 +59,7 @@ fn single_swap() {
             user,
             &token,
             100_000u128,
-            vec![SwapOperation::WyndexSwap {
+            vec![SwapOperation::PalomadexSwap {
                 offer_asset_info: AssetInfo::Token(token.to_string()),
                 ask_asset_info: AssetInfo::Native(ujuno.to_string()),
             }],
@@ -81,7 +81,7 @@ fn multiple_swaps() {
 
     let owner = suite.owner.clone();
 
-    let token_a = suite.instantiate_token(&owner, "wynd");
+    let token_a = suite.instantiate_token(&owner, "paloma");
     let token_b = suite.instantiate_token(&owner, "ueco");
 
     // create LP for just instantiated tokens
@@ -115,15 +115,15 @@ fn multiple_swaps() {
             user,
             coin(100_000u128, "ujuno"),
             vec![
-                SwapOperation::WyndexSwap {
+                SwapOperation::PalomadexSwap {
                     offer_asset_info: AssetInfo::Native(ujuno.to_string()),
                     ask_asset_info: AssetInfo::Token(token_a.to_string()),
                 },
-                SwapOperation::WyndexSwap {
+                SwapOperation::PalomadexSwap {
                     offer_asset_info: AssetInfo::Token(token_a.to_string()),
                     ask_asset_info: AssetInfo::Native(uluna.to_string()),
                 },
-                SwapOperation::WyndexSwap {
+                SwapOperation::PalomadexSwap {
                     offer_asset_info: AssetInfo::Native(uluna.to_string()),
                     ask_asset_info: AssetInfo::Token(token_b.to_string()),
                 },
@@ -177,11 +177,11 @@ fn multi_hop_does_not_enforce_spread_assetion() {
             &token_a,
             50_000_000_000u128,
             vec![
-                SwapOperation::WyndexSwap {
+                SwapOperation::PalomadexSwap {
                     offer_asset_info: AssetInfo::Token(token_a.to_string()),
                     ask_asset_info: AssetInfo::Token(token_b.to_string()),
                 },
-                SwapOperation::WyndexSwap {
+                SwapOperation::PalomadexSwap {
                     offer_asset_info: AssetInfo::Token(token_b.to_string()),
                     ask_asset_info: AssetInfo::Token(token_c.to_string()),
                 },
@@ -195,14 +195,14 @@ fn multi_hop_does_not_enforce_spread_assetion() {
             user,
             &token_a,
             50_000_000_000u128,
-            vec![SwapOperation::WyndexSwap {
+            vec![SwapOperation::PalomadexSwap {
                 offer_asset_info: AssetInfo::Token(token_a.to_string()),
                 ask_asset_info: AssetInfo::Token(token_b.to_string()),
             }],
         )
         .unwrap_err();
     assert_eq!(
-        wyndex::pair::ContractError::MaxSpreadAssertion {},
+        palomadex::pair::ContractError::MaxSpreadAssertion {},
         err.downcast().unwrap()
     )
 }
@@ -240,11 +240,11 @@ fn query_buy_with_routes() {
         .query_simulate_swap_operations(
             1_000_000u128,
             vec![
-                SwapOperation::WyndexSwap {
+                SwapOperation::PalomadexSwap {
                     offer_asset_info: AssetInfo::Native("ujuno".to_owned()),
                     ask_asset_info: AssetInfo::Token(token.to_string()),
                 },
-                SwapOperation::WyndexSwap {
+                SwapOperation::PalomadexSwap {
                     offer_asset_info: AssetInfo::Token(token.to_string()),
                     ask_asset_info: AssetInfo::Native("uluna".to_owned()),
                 },
@@ -265,11 +265,11 @@ fn query_buy_with_routes() {
         .query_simulate_reverse_swap_operations(
             998_002u128,
             vec![
-                SwapOperation::WyndexSwap {
+                SwapOperation::PalomadexSwap {
                     offer_asset_info: AssetInfo::Native("ujuno".to_owned()),
                     ask_asset_info: AssetInfo::Token(token.to_string()),
                 },
-                SwapOperation::WyndexSwap {
+                SwapOperation::PalomadexSwap {
                     offer_asset_info: AssetInfo::Token(token.to_string()),
                     ask_asset_info: AssetInfo::Native("uluna".to_owned()),
                 },
@@ -326,11 +326,11 @@ fn simulation_with_fee() {
         .query_simulate_swap_operations(
             1_000_000u128,
             vec![
-                SwapOperation::WyndexSwap {
+                SwapOperation::PalomadexSwap {
                     offer_asset_info: ujuno_info.clone(),
                     ask_asset_info: token_info.clone(),
                 },
-                SwapOperation::WyndexSwap {
+                SwapOperation::PalomadexSwap {
                     offer_asset_info: token_info.clone(),
                     ask_asset_info: uluna_info.clone(),
                 },
@@ -380,11 +380,11 @@ fn simulation_with_fee() {
         .query_simulate_swap_operations_ref(
             1_000_000u128,
             vec![
-                SwapOperation::WyndexSwap {
+                SwapOperation::PalomadexSwap {
                     offer_asset_info: ujuno_info.clone(),
                     ask_asset_info: token_info.clone(),
                 },
-                SwapOperation::WyndexSwap {
+                SwapOperation::PalomadexSwap {
                     offer_asset_info: token_info.clone(),
                     ask_asset_info: uluna_info.clone(),
                 },
@@ -427,11 +427,11 @@ fn simulation_with_fee() {
         .query_simulate_reverse_swap_operations_ref(
             968_391u128,
             vec![
-                SwapOperation::WyndexSwap {
+                SwapOperation::PalomadexSwap {
                     offer_asset_info: ujuno_info,
                     ask_asset_info: token_info.clone(),
                 },
-                SwapOperation::WyndexSwap {
+                SwapOperation::PalomadexSwap {
                     offer_asset_info: token_info,
                     ask_asset_info: uluna_info,
                 },
@@ -527,7 +527,7 @@ fn maximum_receive_swap_operations() {
             user,
             coin(100_000u128, "ujuno"),
             vec![
-                SwapOperation::WyndexSwap {
+                SwapOperation::PalomadexSwap {
                     offer_asset_info: AssetInfo::Native(ujuno.to_string()),
                     ask_asset_info: AssetInfo::Native(uluna.to_owned()),
                 };
@@ -590,7 +590,7 @@ fn referral_single() {
 
     let owner = suite.owner.clone();
 
-    let token = suite.instantiate_token(&owner, "wynd");
+    let token = suite.instantiate_token(&owner, "paloma");
 
     // create LP for just instantiated tokens
     suite
@@ -612,7 +612,7 @@ fn referral_single() {
             user,
             &token,
             101_010u128,
-            vec![SwapOperation::WyndexSwap {
+            vec![SwapOperation::PalomadexSwap {
                 offer_asset_info: AssetInfo::Token(token.to_string()),
                 ask_asset_info: AssetInfo::Native(ujuno.to_string()),
             }],
@@ -642,7 +642,7 @@ fn referral_multiple() {
 
     let owner = suite.owner.clone();
 
-    let token_a = suite.instantiate_token(&owner, "wynd");
+    let token_a = suite.instantiate_token(&owner, "paloma");
     let token_b = suite.instantiate_token(&owner, "ueco");
 
     // create LP for just instantiated tokens
@@ -672,15 +672,15 @@ fn referral_multiple() {
         .unwrap();
 
     let operations = vec![
-        SwapOperation::WyndexSwap {
+        SwapOperation::PalomadexSwap {
             offer_asset_info: AssetInfo::Native(ujuno.to_string()),
             ask_asset_info: AssetInfo::Token(token_a.to_string()),
         },
-        SwapOperation::WyndexSwap {
+        SwapOperation::PalomadexSwap {
             offer_asset_info: AssetInfo::Token(token_a.to_string()),
             ask_asset_info: AssetInfo::Native(uluna.to_string()),
         },
-        SwapOperation::WyndexSwap {
+        SwapOperation::PalomadexSwap {
             offer_asset_info: AssetInfo::Native(uluna.to_string()),
             ask_asset_info: AssetInfo::Token(token_b.to_string()),
         },
@@ -729,7 +729,7 @@ fn invalid_referral_commission() {
 
     let owner = suite.owner.clone();
 
-    let token = suite.instantiate_token(&owner, "wynd");
+    let token = suite.instantiate_token(&owner, "paloma");
 
     // create LP for just instantiated tokens
     suite
@@ -752,7 +752,7 @@ fn invalid_referral_commission() {
             user,
             &token,
             100_000,
-            vec![SwapOperation::WyndexSwap {
+            vec![SwapOperation::PalomadexSwap {
                 offer_asset_info: AssetInfo::Token(token.to_string()),
                 ask_asset_info: AssetInfo::Native(ujuno.to_string()),
             }],
@@ -779,7 +779,7 @@ fn referral_commission_zero() {
 
     let owner = suite.owner.clone();
 
-    let token = suite.instantiate_token(&owner, "wynd");
+    let token = suite.instantiate_token(&owner, "paloma");
 
     // create LP for just instantiated tokens
     suite
@@ -800,7 +800,7 @@ fn referral_commission_zero() {
             user,
             &token,
             1000,
-            vec![SwapOperation::WyndexSwap {
+            vec![SwapOperation::PalomadexSwap {
                 offer_asset_info: AssetInfo::Token(token.to_string()),
                 ask_asset_info: AssetInfo::Native(ujuno.to_string()),
             }],

@@ -1,12 +1,12 @@
 [package]
 name = "cw-splitter"
-authors = ["Jakub Bogucki <jakub@confio.gmbh>"]
+authors = ["Volume Fi"]
 version = { workspace = true }
 edition = { workspace = true }
 description = "Contract that splits balance between payees according to configuration"
 license = { workspace = true }
 repository = { workspace = true }
-homepage = "https://www.wynddao.com"
+homepage = "https://www.palomachain.com"
 
 [lib]
 crate-type = ["cdylib", "rlib"]

@@ -3,15 +3,15 @@ use cosmwasm_schema::{cw_serde, QueryResponses};
 use cosmwasm_std::{Decimal, Uint128};
 use cw20::Cw20ReceiveMsg;
 
-use wyndex::asset::{AssetInfo, AssetValidated};
+use palomadex::asset::{AssetInfo, AssetValidated};
 
 pub const MAX_SWAP_OPERATIONS: usize = 50;
 
 /// This structure holds the parameters used for creating a contract.
 #[cw_serde]
 pub struct InstantiateMsg {
-    /// The wyndex factory contract address
-    pub wyndex_factory: String,
+    /// The palomadex factory contract address
+    pub palomadex_factory: String,
 }
 
 /// This enum describes a swap operation.
@@ -19,8 +19,8 @@ pub struct InstantiateMsg {
 /// so we can add other AMMs in the future.
 #[cw_serde]
 pub enum SwapOperation {
-    /// Wyndex swap
-    WyndexSwap {
+    /// Palomadex swap
+    PalomadexSwap {
         /// Information about the asset being swapped
         offer_asset_info: AssetInfo,
         /// Information about the asset we swap to
@@ -31,7 +31,7 @@ pub enum SwapOperation {
 impl SwapOperation {
     pub fn get_target_asset_info(&self) -> AssetInfo {
         match self {
-            SwapOperation::WyndexSwap { ask_asset_info, .. } => ask_asset_info.clone(),
+            SwapOperation::PalomadexSwap { ask_asset_info, .. } => ask_asset_info.clone(),
         }
     }
 }
@@ -147,8 +147,8 @@ pub enum QueryMsg {
 /// This structure describes a custom struct to return a query response containing the base contract configuration.
 #[cw_serde]
 pub struct ConfigResponse {
-    /// The Wyndex factory contract address
-    pub wyndex_factory: String,
+    /// The Palomadex factory contract address
+    pub palomadex_factory: String,
 }
 
 /// This structure describes a custom struct to return a query response containing the end amount of a swap simulation

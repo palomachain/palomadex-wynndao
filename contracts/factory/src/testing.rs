@@ -2,7 +2,7 @@ use cosmwasm_std::{
     attr, from_binary, to_binary, Addr, Decimal, ReplyOn, SubMsg, Uint128, WasmMsg,
 };
 use cw_utils::MsgInstantiateContractResponse;
-use wyndex::fee_config::FeeConfig;
+use palomadex::fee_config::FeeConfig;
 
 use crate::mock_querier::mock_dependencies;
 use crate::state::CONFIG;
@@ -10,16 +10,16 @@ use crate::{
     contract::{execute, instantiate, query},
     error::ContractError,
 };
-use wyndex::asset::AssetInfo;
-use wyndex::factory::{
+use palomadex::asset::AssetInfo;
+use palomadex::factory::{
     ConfigResponse, DefaultStakeConfig, ExecuteMsg, InstantiateMsg, PairConfig, PairType,
     PairsResponse, PartialStakeConfig, QueryMsg,
 };
-use wyndex::pair::PairInfo;
+use palomadex::pair::PairInfo;
 
 use crate::contract::reply;
 use cosmwasm_std::testing::{mock_env, mock_info, MOCK_CONTRACT_ADDR};
-use wyndex::pair::InstantiateMsg as PairInstantiateMsg;
+use palomadex::pair::InstantiateMsg as PairInstantiateMsg;
 
 fn default_stake_config() -> DefaultStakeConfig {
     DefaultStakeConfig {
@@ -540,7 +540,7 @@ fn create_pair() {
                 code_id: pair_config.code_id,
                 funds: vec![],
                 admin: Some(config.unwrap().owner.to_string()),
-                label: String::from("Wyndex pair"),
+                label: String::from("Palomadex pair"),
             }
             .into(),
             id: 1,
@@ -614,8 +614,8 @@ fn register() {
 
     let mut deployed_pairs = vec![(&pair0_addr, &pair0_info)];
 
-    // Register an Wyndex pair querier
-    deps.querier.with_wyndex_pairs(&deployed_pairs);
+    // Register an Palomadex pair querier
+    deps.querier.with_palomadex_pairs(&deployed_pairs);
 
     let instantiate_res = MsgInstantiateContractResponse {
         contract_address: String::from("pair0000"),
@@ -691,8 +691,8 @@ fn register() {
 
     deployed_pairs.push((&pair1_addr, &pair1_info));
 
-    // Register wyndex pair querier
-    deps.querier.with_wyndex_pairs(&deployed_pairs);
+    // Register palomadex pair querier
+    deps.querier.with_palomadex_pairs(&deployed_pairs);
 
     let instantiate_res = MsgInstantiateContractResponse {
         contract_address: String::from("pair0001"),

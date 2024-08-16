@@ -4,21 +4,15 @@ use cosmwasm_std::{
     coins, to_binary, Addr, Binary, CosmosMsg, Deps, DepsMut, Env, MessageInfo, Response,
     StdResult, Uint128, WasmMsg,
 };
-use cw2::set_contract_version;
 use cw20::Cw20ExecuteMsg;
 
-use cw_placeholder::contract::CONTRACT_NAME as PLACEHOLDER_CONTRACT_NAME;
-use wyndex::asset::{AssetInfoValidated, AssetValidated};
-use wyndex::stake::{FundingInfo, ReceiveMsg as StakeReceiveDelegationMsg};
-use wyndex_stake::msg::ExecuteMsg as StakeExecuteMsg;
+use palomadex::asset::{AssetInfoValidated, AssetValidated};
+use palomadex::stake::{FundingInfo, ReceiveMsg as StakeReceiveDelegationMsg};
+use palomadex_stake::msg::ExecuteMsg as StakeExecuteMsg;
 
 use crate::error::ContractError;
 use crate::msg::{AdapterQueryMsg, ExecuteMsg, InstantiateMsg, MigrateMsg};
 use crate::state::{Config, CONFIG};
-
-// version info for migration info
-const CONTRACT_NAME: &str = "crates.io:gauge-adapter";
-const CONTRACT_VERSION: &str = env!("CARGO_PKG_VERSION");
 
 #[cfg_attr(not(feature = "library"), entry_point)]
 pub fn instantiate(
@@ -27,8 +21,6 @@ pub fn instantiate(
     _info: MessageInfo,
     msg: InstantiateMsg,
 ) -> Result<Response, ContractError> {
-    set_contract_version(deps.storage, CONTRACT_NAME, CONTRACT_VERSION)?;
-
     if msg.epoch_length == 0u64 {
         return Err(ContractError::ZeroDistributionDuration {});
     };
@@ -188,47 +180,13 @@ fn create_distribute_msgs(
     }
 }
 
-/// Manages the contract migration.
-#[cfg_attr(not(feature = "library"), entry_point)]
-pub fn migrate(deps: DepsMut, env: Env, msg: MigrateMsg) -> Result<Response, ContractError> {
-    match msg {
-        MigrateMsg::Init(msg) => {
-            // Enforce previous contract name was crates.io:cw-placeholder
-            let ver = cw2::get_contract_version(deps.storage)?;
-            if ver.contract != PLACEHOLDER_CONTRACT_NAME {
-                return Err(ContractError::NotPlaceholder);
-            }
-
-            // Gather contract info to pass admin
-            let contract_info = deps
-                .querier
-                .query_wasm_contract_info(env.contract.address.clone())?;
-            let sender = deps.api.addr_validate(&contract_info.admin.unwrap())?;
-
-            instantiate(
-                deps,
-                env,
-                MessageInfo {
-                    sender,
-                    funds: vec![],
-                },
-                msg,
-            )
-            .unwrap();
-        }
-        MigrateMsg::Update {} => {}
-    };
-
-    Ok(Response::new())
-}
-
 #[cfg(test)]
 mod tests {
     use cosmwasm_std::{
         testing::{mock_dependencies, mock_env, mock_info},
         to_binary, Coin, CosmosMsg, Decimal, Uint128, WasmMsg,
     };
-    use wyndex::stake::FundingInfo;
+    use palomadex::stake::FundingInfo;
 
     use super::{execute, instantiate, query};
     use crate::{
@@ -236,7 +194,7 @@ mod tests {
         msg::{ExecuteMsg, InstantiateMsg},
         state::CONFIG,
     };
-    use wyndex::asset::{Asset, AssetInfo};
+    use palomadex::asset::{Asset, AssetInfo};
 
     const EPOCH_LENGTH: u64 = 86_400;
 
@@ -247,8 +205,8 @@ mod tests {
         let mut msg = InstantiateMsg {
             factory: "factory".to_string(),
             owner: "owner".to_string(),
-            rewards_asset: wyndex::asset::Asset {
-                info: wyndex::asset::AssetInfo::Native("juno".to_string()),
+            rewards_asset: palomadex::asset::Asset {
+                info: palomadex::asset::AssetInfo::Native("juno".to_string()),
                 amount: amount.into(),
             },
             epoch_length: 0u64,
@@ -276,7 +234,7 @@ mod tests {
         assert_eq!(config.factory, "factory");
         assert_eq!(
             config.rewards_asset.info,
-            wyndex::asset::AssetInfoValidated::Native("juno".to_string())
+            palomadex::asset::AssetInfoValidated::Native("juno".to_string())
         );
         assert_eq!(config.rewards_asset.amount.u128(), 1000);
         assert_eq!(config.distribution_duration, EPOCH_LENGTH);
@@ -294,8 +252,8 @@ mod tests {
             InstantiateMsg {
                 factory: "factory".to_string(),
                 owner: "owner".to_string(),
-                rewards_asset: wyndex::asset::Asset {
-                    info: wyndex::asset::AssetInfo::Native("juno".to_string()),
+                rewards_asset: palomadex::asset::Asset {
+                    info: palomadex::asset::AssetInfo::Native("juno".to_string()),
                     amount: amount.into(),
                 },
                 epoch_length: EPOCH_LENGTH,
@@ -314,7 +272,7 @@ mod tests {
             res.execute[0],
             CosmosMsg::Wasm(WasmMsg::Execute {
                 contract_addr: "juno1555".to_string(),
-                msg: to_binary(&wyndex_stake::msg::ExecuteMsg::FundDistribution {
+                msg: to_binary(&palomadex_stake::msg::ExecuteMsg::FundDistribution {
                     funding_info: FundingInfo {
                         start_time: mock_env().block.time.seconds(),
                         distribution_duration: EPOCH_LENGTH,
@@ -332,7 +290,7 @@ mod tests {
             res.execute[1],
             CosmosMsg::Wasm(WasmMsg::Execute {
                 contract_addr: "juno1444".to_string(),
-                msg: to_binary(&wyndex_stake::msg::ExecuteMsg::FundDistribution {
+                msg: to_binary(&palomadex_stake::msg::ExecuteMsg::FundDistribution {
                     funding_info: FundingInfo {
                         start_time: mock_env().block.time.seconds(),
                         distribution_duration: EPOCH_LENGTH,
@@ -350,7 +308,7 @@ mod tests {
             res.execute[2],
             CosmosMsg::Wasm(WasmMsg::Execute {
                 contract_addr: "juno1333".to_string(),
-                msg: to_binary(&wyndex_stake::msg::ExecuteMsg::FundDistribution {
+                msg: to_binary(&palomadex_stake::msg::ExecuteMsg::FundDistribution {
                     funding_info: FundingInfo {
                         start_time: mock_env().block.time.seconds(),
                         distribution_duration: EPOCH_LENGTH,
@@ -419,7 +377,7 @@ mod tests {
         let config = CONFIG.load(deps.as_ref().storage).unwrap();
         assert_eq!(
             config.rewards_asset.info,
-            wyndex::asset::AssetInfoValidated::Native("juno".to_string())
+            palomadex::asset::AssetInfoValidated::Native("juno".to_string())
         );
         assert_eq!(config.rewards_asset.amount.u128(), 2000);
     }

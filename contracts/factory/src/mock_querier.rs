@@ -3,12 +3,12 @@ use cosmwasm_std::{
     from_binary, from_slice, to_binary, Coin, Empty, OwnedDeps, Querier, QuerierResult,
     QueryRequest, SystemError, SystemResult, WasmQuery,
 };
+use palomadex::pair::PairInfo;
+use palomadex::pair::QueryMsg;
 use std::collections::HashMap;
-use wyndex::pair::PairInfo;
-use wyndex::pair::QueryMsg;
 
 /// mock_dependencies is a drop-in replacement for cosmwasm_std::testing::mock_dependencies.
-/// This uses the Wyndex CustomQuerier.
+/// This uses the Palomadex CustomQuerier.
 pub fn mock_dependencies(
     contract_balance: &[Coin],
 ) -> OwnedDeps<MockStorage, MockApi, WasmMockQuerier> {
@@ -25,17 +25,17 @@ pub fn mock_dependencies(
 
 pub struct WasmMockQuerier {
     base: MockQuerier<Empty>,
-    wyndex_pair_querier: WyndexPairQuerier,
+    palomadex_pair_querier: PalomadexPairQuerier,
 }
 
 #[derive(Clone, Default)]
-pub struct WyndexPairQuerier {
+pub struct PalomadexPairQuerier {
     pairs: HashMap<String, PairInfo>,
 }
 
-impl WyndexPairQuerier {
+impl PalomadexPairQuerier {
     pub fn new(pairs: &[(&String, &PairInfo)]) -> Self {
-        WyndexPairQuerier {
+        PalomadexPairQuerier {
             pairs: pairs_to_map(pairs),
         }
     }
@@ -72,7 +72,7 @@ impl WasmMockQuerier {
                 => match from_binary(msg).unwrap() {
                     QueryMsg::Pair {} => {
                        let pair_info: PairInfo =
-                        match self.wyndex_pair_querier.pairs.get(contract_addr) {
+                        match self.palomadex_pair_querier.pairs.get(contract_addr) {
                             Some(v) => v.clone(),
                             None => {
                                 return SystemResult::Err(SystemError::NoSuchContract {
@@ -94,12 +94,12 @@ impl WasmMockQuerier {
     pub fn new(base: MockQuerier<Empty>) -> Self {
         WasmMockQuerier {
             base,
-            wyndex_pair_querier: WyndexPairQuerier::default(),
+            palomadex_pair_querier: PalomadexPairQuerier::default(),
         }
     }
 
-    // Configure the Wyndex pair
-    pub fn with_wyndex_pairs(&mut self, pairs: &[(&String, &PairInfo)]) {
-        self.wyndex_pair_querier = WyndexPairQuerier::new(pairs);
+    // Configure the Palomadex pair
+    pub fn with_palomadex_pairs(&mut self, pairs: &[(&String, &PairInfo)]) {
+        self.palomadex_pair_querier = PalomadexPairQuerier::new(pairs);
     }
 }

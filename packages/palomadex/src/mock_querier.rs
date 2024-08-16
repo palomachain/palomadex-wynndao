@@ -11,7 +11,7 @@ use crate::pair::PairInfo;
 use cw20::{BalanceResponse, Cw20QueryMsg, TokenInfoResponse};
 
 /// mock_dependencies is a drop-in replacement for cosmwasm_std::testing::mock_dependencies
-/// This uses the Wyndex CustomQuerier.
+/// This uses the Palomadex CustomQuerier.
 pub fn mock_dependencies(
     contract_balance: &[Coin],
 ) -> OwnedDeps<MockStorage, MockApi, WasmMockQuerier> {
@@ -66,13 +66,13 @@ pub(crate) fn balances_to_map(
 }
 
 #[derive(Clone, Default)]
-pub struct WyndexFactoryQuerier {
+pub struct PalomadexFactoryQuerier {
     pairs: HashMap<String, PairInfo>,
 }
 
-impl WyndexFactoryQuerier {
+impl PalomadexFactoryQuerier {
     pub fn new(pairs: &[(&String, &PairInfo)]) -> Self {
-        WyndexFactoryQuerier {
+        PalomadexFactoryQuerier {
             pairs: pairs_to_map(pairs),
         }
     }
@@ -173,7 +173,7 @@ impl CW20QueryHandler {
 
 struct DefaultQueryHandler {
     base: MockQuerier<Empty>,
-    wyndex_factory_querier: WyndexFactoryQuerier,
+    palomadex_factory_querier: PalomadexFactoryQuerier,
 }
 
 impl DefaultQueryHandler {
@@ -185,7 +185,7 @@ impl DefaultQueryHandler {
             }) => match from_binary(msg).unwrap() {
                 FactoryQueryMsg::Pair { asset_infos } => {
                     let key = asset_infos[0].to_string() + asset_infos[1].to_string().as_str();
-                    match self.wyndex_factory_querier.pairs.get(&key) {
+                    match self.palomadex_factory_querier.pairs.get(&key) {
                         Some(v) => SystemResult::Ok(to_binary(&v).into()),
                         None => SystemResult::Err(SystemError::InvalidRequest {
                             error: "No pair info exists".to_string(),
@@ -205,7 +205,7 @@ impl WasmMockQuerier {
         WasmMockQuerier {
             query_handler: DefaultQueryHandler {
                 base,
-                wyndex_factory_querier: WyndexFactoryQuerier::default(),
+                palomadex_factory_querier: PalomadexFactoryQuerier::default(),
             },
             cw20_query_handler: CW20QueryHandler {
                 token_querier: TokenQuerier::default(),
@@ -219,9 +219,9 @@ impl WasmMockQuerier {
         self.cw20_query_handler.token_querier = TokenQuerier::new(balances);
     }
 
-    // Configure the Wyndex pair
-    pub fn with_wyndex_pairs(&mut self, pairs: &[(&String, &PairInfo)]) {
-        self.query_handler.wyndex_factory_querier = WyndexFactoryQuerier::new(pairs);
+    // Configure the Palomadex pair
+    pub fn with_palomadex_pairs(&mut self, pairs: &[(&String, &PairInfo)]) {
+        self.query_handler.palomadex_factory_querier = PalomadexFactoryQuerier::new(pairs);
     }
 
     pub fn with_default_query_handler(&mut self) {

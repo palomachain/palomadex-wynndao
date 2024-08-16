@@ -1,6 +1,6 @@
 [package]
 name = "gauge-adapter"
-authors = ["Cosmorama <cosmorama@proton.me>, 0xFable <0xfable@protonmail.com>"]
+authors = ["Volume Fi"]
 version = { workspace = true }
 edition = { workspace = true }
 license = { workspace = true }
@@ -25,8 +25,8 @@ cw2 = { workspace = true }
 cw20 = { workspace = true }
 thiserror = { workspace = true }
 wynd-curve-utils = { workspace = true }
-wyndex = { workspace = true }
-wyndex-stake = { workspace = true, features = ["library"] }
+palomadex = { workspace = true }
+palomadex-stake = { workspace = true, features = ["library"] }
 cw-placeholder = { workspace = true, features = ["library"] }
 
 [dev-dependencies]
@@ -34,6 +34,6 @@ anyhow = { workspace = true }
 cw-multi-test = { workspace = true }
 cw20 = { workspace = true }
 cw20-base = { workspace = true }
-wyndex-factory = { workspace = true }
-wyndex-pair = { workspace = true }
-wyndex-pair-lsd = { workspace = true }
+palomadex-factory = { workspace = true }
+palomadex-pair = { workspace = true }
+palomadex-pair-lsd = { workspace = true }

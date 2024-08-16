@@ -2,16 +2,16 @@ use tests::SuiteBuilder;
 
 use cosmwasm_std::{coin, from_slice, Addr, Decimal, Uint128};
 
-use wyndex::{
+use palomadex::{
     asset::{AssetInfo, AssetInfoExt},
     factory::PartialStakeConfig,
     stake::ReceiveMsg,
 };
-use wyndex_stake::msg::{QueryMsg as StakeQueryMsg, StakedResponse};
-use wyndex_stake::state::Config as WyndexStakeConfig;
+use palomadex_stake::msg::{QueryMsg as StakeQueryMsg, StakedResponse};
+use palomadex_stake::state::Config as PalomadexStakeConfig;
 
 mod staking {
-    use wyndex::factory::{DefaultStakeConfig, DistributionFlow};
+    use palomadex::factory::{DefaultStakeConfig, DistributionFlow};
 
     use super::*;
 
@@ -44,7 +44,7 @@ mod staking {
         let pair = suite
             .create_pair(
                 "owner",
-                wyndex::factory::PairType::Xyk {},
+                palomadex::factory::PairType::Xyk {},
                 [ujuno_info.clone(), uluna_info.clone()],
                 Some(PartialStakeConfig {
                     tokens_per_power: Some(Uint128::new(100)),
@@ -124,7 +124,7 @@ mod staking {
         // create a pair
         let pair = suite
             .create_pair_and_provide_liquidity(
-                wyndex::factory::PairType::Xyk {},
+                palomadex::factory::PairType::Xyk {},
                 (ujuno_info.clone(), 100_000),
                 (uluna_info.clone(), 100_000),
                 vec![coin(100_000, ujuno), coin(100_000, uluna)],
@@ -134,13 +134,13 @@ mod staking {
         // get info with staking contract address
         let pair_info = suite.query_pair(vec![ujuno_info, uluna_info]).unwrap();
 
-        let stake_config: WyndexStakeConfig = from_slice(
+        let stake_config: PalomadexStakeConfig = from_slice(
             &suite
                 .app
                 .wrap()
                 .query_wasm_raw(
                     pair_info.staking_addr,
-                    wyndex_pair::state::CONFIG.as_slice(),
+                    palomadex_pair::state::CONFIG.as_slice(),
                 )
                 .unwrap()
                 .unwrap(),
@@ -191,7 +191,7 @@ mod staking {
         suite
             .create_pair_and_distributions(
                 owner,
-                wyndex::factory::PairType::Xyk {},
+                palomadex::factory::PairType::Xyk {},
                 vec![ujuno_info.clone(), uluna_info.clone()],
                 None,
                 vec![

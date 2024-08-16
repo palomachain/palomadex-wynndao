@@ -1,4 +1,4 @@
-# WYND Stake
+# PALOMA Stake
 
 **TODO: Update** This is the original description from cw4-stake for now
 

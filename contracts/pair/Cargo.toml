@@ -1,9 +1,9 @@
 [package]
-name = "wyndex-pair"
+name = "palomadex-pair"
 version = { workspace = true }
-authors = ["Cosmorama <cosmorama@proton.me>"]
+authors = ["Volume Fi"]
 edition = { workspace = true }
-description = "The Wyndex constant product pool contract implementation"
+description = "The PalomaDex constant product pool contract implementation"
 license = { workspace = true }
 
 [lib]
@@ -22,10 +22,10 @@ cw20 = { workspace = true }
 cw20-base = { workspace = true }
 cw-storage-plus = { workspace = true }
 cw-utils = { workspace = true }
-wyndex-stake = { workspace = true }
-wyndex = { workspace = true }
+palomadex-stake = { workspace = true }
+palomadex = { workspace = true }
 
 [dev-dependencies]
 cw-multi-test = { workspace = true }
 proptest = { workspace = true }
-wyndex-factory = { workspace = true }
+palomadex-factory = { workspace = true }

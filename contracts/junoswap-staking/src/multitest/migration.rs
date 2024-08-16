@@ -84,7 +84,7 @@ fn partial_migration() {
     // only 5 stakers should have tokens now
     let lp_tokens: Vec<_> = users
         .iter()
-        .map(|u| suite.wyndex_staked(u, suite.migration_unbonding_period()))
+        .map(|u| suite.palomadex_staked(u, suite.migration_unbonding_period()))
         .filter(|lp| *lp > 0)
         .collect();
     assert_eq!(lp_tokens.len(), 5);
@@ -97,7 +97,7 @@ fn partial_migration() {
     // next 5 stakers should also have tokens now
     let lp_tokens: Vec<_> = users
         .iter()
-        .map(|u| suite.wyndex_staked(u, suite.migration_unbonding_period()))
+        .map(|u| suite.palomadex_staked(u, suite.migration_unbonding_period()))
         .filter(|lp| *lp > 0)
         .collect();
     assert_eq!(lp_tokens.len(), 10);
@@ -121,23 +121,23 @@ fn migration_sanity_check() {
     suite.stake_junoswap_lp(user, to_stake, None, None).unwrap();
 
     // make sure no lp before the deposit
-    let wyndex_total = suite.total_wyndex_lp();
-    assert_eq!(wyndex_total, 0u128);
+    let palomadex_total = suite.total_palomadex_lp();
+    assert_eq!(palomadex_total, 0u128);
 
     // cross our fingers this works ;)
-    suite.migrate_to_wyndex(None, None, None).unwrap();
+    suite.migrate_to_palomadex(None, None, None).unwrap();
 
-    // 80% of liquidity moved to wyndex pool
-    let wyndex = suite
+    // 80% of liquidity moved to palomadex pool
+    let palomadex = suite
         .app
         .wrap()
-        .query_all_balances(&suite.wyndex_pair_contract)
+        .query_all_balances(&suite.palomadex_pair_contract)
         .unwrap();
     let expected = liquidity
         .iter()
         .map(|Coin { amount, denom }| coin(amount.u128() * 4 / 5, denom))
         .collect::<Vec<_>>();
-    assert_eq!(wyndex, expected);
+    assert_eq!(palomadex, expected);
 
     // 20% of liquidity still in junoswap
     let junoswap = suite
@@ -154,16 +154,19 @@ fn migration_sanity_check() {
     // ensure all lp belong to the staking contract
     // except for the MINIMUM_LIQUIDITY_DEPOSIT - held by pool
     // https://github.com/cosmorama/wyndex-priv/blob/d39f7369d22d458a85c6828d151bc3844a1604bf/contracts/pair/src/contract.rs#L381-L395
-    let wyndex_total = suite.total_wyndex_lp();
-    let wyndex_staked = suite.total_wyndex_staked();
-    let pool = suite.wyndex_pair_contract.to_string();
-    let pool_own_lp = suite.wyndex_lp(&pool);
-    assert_eq!(wyndex_total, wyndex_staked + pool_own_lp);
-    assert_eq!(pool_own_lp, wyndex::asset::MINIMUM_LIQUIDITY_AMOUNT.u128());
+    let palomadex_total = suite.total_palomadex_lp();
+    let palomadex_staked = suite.total_palomadex_staked();
+    let pool = suite.palomadex_pair_contract.to_string();
+    let pool_own_lp = suite.palomadex_lp(&pool);
+    assert_eq!(palomadex_total, palomadex_staked + pool_own_lp);
+    assert_eq!(
+        pool_own_lp,
+        palomadex::asset::MINIMUM_LIQUIDITY_AMOUNT.u128()
+    );
 
     // ensure all staked tokens belong to the migrated user
-    let user_staked = suite.wyndex_staked(user, suite.migration_unbonding_period());
-    assert_eq!(user_staked, wyndex_staked);
+    let user_staked = suite.palomadex_staked(user, suite.migration_unbonding_period());
+    assert_eq!(user_staked, palomadex_staked);
 }
 
 #[test]
@@ -181,7 +184,7 @@ fn non_migrator_cant_migrate() {
 
     // this won't work, not the migrator
     let err = suite
-        .migrate_to_wyndex(Some(Addr::unchecked("notthemigrator")), None, None)
+        .migrate_to_palomadex(Some(Addr::unchecked("notthemigrator")), None, None)
         .unwrap_err();
     assert_eq!(ContractError::Unauthorized {}, err.downcast().unwrap())
 }
@@ -200,9 +203,9 @@ fn migrator_cant_migrate_to_own_addr() {
 
     // this won't work, we can only migrate to a deployed pool contract.
     let err = suite
-        .migrate_to_wyndex(
+        .migrate_to_palomadex(
             Some(Addr::unchecked("owner")),
-            Some(suite.wyndex_pair_contract.clone()),
+            Some(suite.palomadex_pair_contract.clone()),
             Some(Addr::unchecked("owner")),
         )
         .unwrap_err();
@@ -317,33 +320,33 @@ fn migration_multiple_users() {
         .unwrap();
 
     // perform the migration of liquidity
-    suite.migrate_to_wyndex(None, None, None).unwrap();
+    suite.migrate_to_palomadex(None, None, None).unwrap();
 
-    // 80% of liquidity moved to wyndex pool
-    let wyndex = suite
+    // 80% of liquidity moved to palomadex pool
+    let palomadex = suite
         .app
         .wrap()
-        .query_all_balances(&suite.wyndex_pair_contract)
+        .query_all_balances(&suite.palomadex_pair_contract)
         .unwrap();
     let expected = liquidity
         .iter()
         .map(|Coin { amount, denom }| coin(amount.u128() * 4 / 5, denom))
         .collect::<Vec<_>>();
-    assert_eq!(wyndex, expected);
+    assert_eq!(palomadex, expected);
 
     // ensure all lp belong to the staking contract
-    let wyndex_total = suite.total_wyndex_lp();
-    let wyndex_staked = suite.total_wyndex_staked();
-    assert_approx_eq!(wyndex_total, wyndex_staked, "0.01");
+    let palomadex_total = suite.total_palomadex_lp();
+    let palomadex_staked = suite.total_palomadex_staked();
+    assert_approx_eq!(palomadex_total, palomadex_staked, "0.01");
     // ensure all staked tokens belong to the migrated user
-    let user_staked = suite.wyndex_staked(users[0], suite.migration_unbonding_period());
-    assert_eq!(user_staked, wyndex_staked / 10 * 3);
+    let user_staked = suite.palomadex_staked(users[0], suite.migration_unbonding_period());
+    assert_eq!(user_staked, palomadex_staked / 10 * 3);
     // user 2 staked 500k so they should have about 10% of the staked tokens
-    let user_staked = suite.wyndex_staked(users[1], suite.migration_unbonding_period());
-    assert_eq!(user_staked, wyndex_staked / 10,);
+    let user_staked = suite.palomadex_staked(users[1], suite.migration_unbonding_period());
+    assert_eq!(user_staked, palomadex_staked / 10,);
     // user 3 did 3m and should have 60%
-    let user_staked = suite.wyndex_staked(users[2], suite.migration_unbonding_period());
-    assert_eq!(user_staked, wyndex_staked / 10 * 6);
+    let user_staked = suite.palomadex_staked(users[2], suite.migration_unbonding_period());
+    assert_eq!(user_staked, palomadex_staked / 10 * 6);
 }
 
 #[test]
@@ -414,7 +417,7 @@ fn migrate_with_mixed_pairs() {
         .unwrap();
     assert_eq!(junoswap.u128(), liquidity_cw20);
 
-    suite.wyndex_lp_holders();
+    suite.palomadex_lp_holders();
 
     // stake some of these tokens - 80% of liquidity should be moved
     // users[0] will keep everything staked
@@ -463,40 +466,40 @@ fn migrate_with_mixed_pairs() {
         .unwrap();
 
     // perform the migration of liquidity
-    suite.migrate_to_wyndex(None, None, None).unwrap();
+    suite.migrate_to_palomadex(None, None, None).unwrap();
 
-    // 80% of native liquidity moved to wyndex pool
-    let wyndex = suite
+    // 80% of native liquidity moved to palomadex pool
+    let palomadex = suite
         .app
         .wrap()
-        .query_all_balances(&suite.wyndex_pair_contract)
+        .query_all_balances(&suite.palomadex_pair_contract)
         .unwrap();
     let expected = liquidity
         .iter()
         .map(|Coin { amount, denom }| coin(amount.u128() * 4 / 5, denom))
         .collect::<Vec<_>>();
-    assert_eq!(wyndex, expected);
+    assert_eq!(palomadex, expected);
 
-    // 80% of cw20 liquidity moved to wyndex pool
-    let wyndex = cw20::Cw20Contract(raw_address.clone())
-        .balance(&suite.app.wrap(), suite.wyndex_pair_contract.clone())
+    // 80% of cw20 liquidity moved to palomadex pool
+    let palomadex = cw20::Cw20Contract(raw_address.clone())
+        .balance(&suite.app.wrap(), suite.palomadex_pair_contract.clone())
         .unwrap();
     let expected = liquidity_cw20 * 4 / 5;
-    assert_eq!(wyndex.u128(), expected);
+    assert_eq!(palomadex.u128(), expected);
 
     // ensure all lp belong to the staking contract
-    let wyndex_total = suite.total_wyndex_lp();
-    let wyndex_staked = suite.total_wyndex_staked();
-    assert_approx_eq!(wyndex_total, wyndex_staked, "0.001");
+    let palomadex_total = suite.total_palomadex_lp();
+    let palomadex_staked = suite.total_palomadex_staked();
+    assert_approx_eq!(palomadex_total, palomadex_staked, "0.001");
     // ensure all staked tokens belong to the migrated user
-    let user_staked = suite.wyndex_staked(users[0], suite.migration_unbonding_period());
-    assert_eq!(user_staked, wyndex_staked / 3);
+    let user_staked = suite.palomadex_staked(users[0], suite.migration_unbonding_period());
+    assert_eq!(user_staked, palomadex_staked / 3);
     // user 2 staked 500k so they should have about 10% of the staked tokens
-    let user_staked = suite.wyndex_staked(users[1], suite.migration_unbonding_period());
-    assert_eq!(user_staked, wyndex_staked / 3);
+    let user_staked = suite.palomadex_staked(users[1], suite.migration_unbonding_period());
+    assert_eq!(user_staked, palomadex_staked / 3);
     // user 3 did 3m and should have 60%
-    let user_staked = suite.wyndex_staked(users[2], suite.migration_unbonding_period());
-    assert_eq!(user_staked, wyndex_staked / 3);
+    let user_staked = suite.palomadex_staked(users[2], suite.migration_unbonding_period());
+    assert_eq!(user_staked, palomadex_staked / 3);
 }
 
 #[test]
@@ -525,23 +528,23 @@ fn migrate_with_unbonding_claims() {
     );
 
     // make sure no lp before the deposit
-    let wyndex_total = suite.total_wyndex_lp();
-    assert_eq!(wyndex_total, 0u128);
+    let palomadex_total = suite.total_palomadex_lp();
+    assert_eq!(palomadex_total, 0u128);
 
-    // Migrate the liquidity to Wyndex, the liquidity includes 1 pair with 1 user who is currently unstaking
-    suite.migrate_to_wyndex(None, None, None).unwrap();
+    // Migrate the liquidity to Palomadex, the liquidity includes 1 pair with 1 user who is currently unstaking
+    suite.migrate_to_palomadex(None, None, None).unwrap();
 
-    // 80% of liquidity moved to wyndex pool
-    let wyndex = suite
+    // 80% of liquidity moved to palomadex pool
+    let palomadex = suite
         .app
         .wrap()
-        .query_all_balances(&suite.wyndex_pair_contract)
+        .query_all_balances(&suite.palomadex_pair_contract)
         .unwrap();
     let expected = liquidity
         .iter()
         .map(|Coin { amount, denom }| coin(amount.u128() * 4 / 5, denom))
         .collect::<Vec<_>>();
-    assert_eq!(wyndex, expected);
+    assert_eq!(palomadex, expected);
 
     // 20% of liquidity still in junoswap
     let junoswap = suite
@@ -558,16 +561,19 @@ fn migrate_with_unbonding_claims() {
     // ensure all lp belong to the staking contract
     // except for the MINIMUM_LIQUIDITY_DEPOSIT - held by pool
     // https://github.com/cosmorama/wyndex-priv/blob/d39f7369d22d458a85c6828d151bc3844a1604bf/contracts/pair/src/contract.rs#L381-L395
-    let wyndex_total = suite.total_wyndex_lp();
-    let wyndex_staked = suite.total_wyndex_staked();
-    let pool = suite.wyndex_pair_contract.to_string();
-    let pool_own_lp = suite.wyndex_lp(&pool);
-    assert_eq!(wyndex_total, wyndex_staked + pool_own_lp);
-    assert_eq!(pool_own_lp, wyndex::asset::MINIMUM_LIQUIDITY_AMOUNT.u128());
+    let palomadex_total = suite.total_palomadex_lp();
+    let palomadex_staked = suite.total_palomadex_staked();
+    let pool = suite.palomadex_pair_contract.to_string();
+    let pool_own_lp = suite.palomadex_lp(&pool);
+    assert_eq!(palomadex_total, palomadex_staked + pool_own_lp);
+    assert_eq!(
+        pool_own_lp,
+        palomadex::asset::MINIMUM_LIQUIDITY_AMOUNT.u128()
+    );
 
     // ensure all staked tokens belong to the migrated user
-    let user_staked = suite.wyndex_staked(user, suite.migration_unbonding_period());
-    assert_eq!(user_staked, wyndex_staked);
+    let user_staked = suite.palomadex_staked(user, suite.migration_unbonding_period());
+    assert_eq!(user_staked, palomadex_staked);
 }
 
 #[test]
@@ -617,33 +623,36 @@ fn migration_two_cw20() {
         .unwrap();
 
     // make sure no lp before the deposit
-    let wyndex_total = suite.total_wyndex_lp();
-    assert_eq!(wyndex_total, 0u128);
+    let palomadex_total = suite.total_palomadex_lp();
+    assert_eq!(palomadex_total, 0u128);
 
     // cross our fingers this works ;)
-    suite.migrate_to_wyndex(None, None, None).unwrap();
+    suite.migrate_to_palomadex(None, None, None).unwrap();
 
-    // 80% of liquidity moved to wyndex pool
-    let wyndex = cw20::Cw20Contract(raw_address.clone())
-        .balance(&suite.app.wrap(), suite.wyndex_pair_contract.clone())
+    // 80% of liquidity moved to palomadex pool
+    let palomadex = cw20::Cw20Contract(raw_address.clone())
+        .balance(&suite.app.wrap(), suite.palomadex_pair_contract.clone())
         .unwrap();
     let expected = liquidity * 4 / 5;
-    assert_eq!(wyndex.u128(), expected);
-    let wyndex = cw20::Cw20Contract(cw20_address.clone())
-        .balance(&suite.app.wrap(), suite.wyndex_pair_contract.clone())
+    assert_eq!(palomadex.u128(), expected);
+    let palomadex = cw20::Cw20Contract(cw20_address.clone())
+        .balance(&suite.app.wrap(), suite.palomadex_pair_contract.clone())
         .unwrap();
     let expected = liquidity * 4 / 5;
-    assert_eq!(wyndex.u128(), expected);
+    assert_eq!(palomadex.u128(), expected);
 
     // ensure all lp belong to the staking contract
-    let wyndex_total = suite.total_wyndex_lp();
-    let wyndex_staked = suite.total_wyndex_staked();
-    let pool = suite.wyndex_pair_contract.to_string();
-    let pool_own_lp = suite.wyndex_lp(&pool);
-    assert_eq!(wyndex_total, wyndex_staked + pool_own_lp);
-    assert_eq!(pool_own_lp, wyndex::asset::MINIMUM_LIQUIDITY_AMOUNT.u128());
+    let palomadex_total = suite.total_palomadex_lp();
+    let palomadex_staked = suite.total_palomadex_staked();
+    let pool = suite.palomadex_pair_contract.to_string();
+    let pool_own_lp = suite.palomadex_lp(&pool);
+    assert_eq!(palomadex_total, palomadex_staked + pool_own_lp);
+    assert_eq!(
+        pool_own_lp,
+        palomadex::asset::MINIMUM_LIQUIDITY_AMOUNT.u128()
+    );
 
     // ensure all staked tokens belong to the migrated user
-    let user_staked = suite.wyndex_staked(user, suite.migration_unbonding_period());
-    assert_eq!(user_staked, wyndex_staked);
+    let user_staked = suite.palomadex_staked(user, suite.migration_unbonding_period());
+    assert_eq!(user_staked, palomadex_staked);
 }

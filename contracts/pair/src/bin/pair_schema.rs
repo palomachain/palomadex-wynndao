@@ -1,5 +1,5 @@
 use cosmwasm_schema::write_api;
-use wyndex::pair::{ExecuteMsg, InstantiateMsg, QueryMsg};
+use palomadex::pair::{ExecuteMsg, InstantiateMsg, QueryMsg};
 
 fn main() {
     write_api! {

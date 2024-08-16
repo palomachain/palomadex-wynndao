@@ -4,9 +4,9 @@ use cw_storage_plus::{Bound, Item, Map};
 use itertools::Itertools;
 
 use crate::error::ContractError;
-use wyndex::asset::{Asset, AssetInfo, AssetInfoValidated};
-use wyndex::common::OwnershipProposal;
-use wyndex::factory::{DefaultStakeConfig, DistributionFlow, PairConfig};
+use palomadex::asset::{Asset, AssetInfo, AssetInfoValidated};
+use palomadex::common::OwnershipProposal;
+use palomadex::factory::{DefaultStakeConfig, DistributionFlow, PairConfig};
 
 /// This structure holds the main contract parameters.
 #[cw_serde]
@@ -153,7 +153,7 @@ pub const PAIRS_TO_MIGRATE: Item<Vec<Addr>> = Item::new("pairs_to_migrate");
 #[cfg(test)]
 mod tests {
     use cosmwasm_std::testing::MockApi;
-    use wyndex::asset::{native_asset_info, token_asset_info};
+    use palomadex::asset::{native_asset_info, token_asset_info};
 
     use super::*;
 

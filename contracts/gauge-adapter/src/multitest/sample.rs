@@ -1,6 +1,6 @@
 use crate::multitest::suite::Suite;
 use cosmwasm_std::{assert_approx_eq, coin, Addr, Decimal};
-use wyndex::{asset::AssetInfo, factory::DefaultStakeConfig};
+use palomadex::{asset::AssetInfo, factory::DefaultStakeConfig};
 
 use super::suite::SuiteBuilder;
 
@@ -22,14 +22,14 @@ fn native_rewards_work() {
         .build();
 
     // create cw20 token
-    let wynd = suite.instantiate_token("owner", "WYND");
-    let wynd_info = AssetInfo::Token(wynd.to_string());
+    let paloma = suite.instantiate_token("owner", "PALOMA");
+    let paloma_info = AssetInfo::Token(paloma.to_string());
 
     let juno = AssetInfo::Native("juno".to_string());
     let asdf = AssetInfo::Native("asdf".to_string());
     // create pairs to reward
     let (pair1_staking, pair1_lpt) = suite
-        .create_pair_staking(juno.clone(), wynd_info.clone())
+        .create_pair_staking(juno.clone(), paloma_info.clone())
         .unwrap();
     let (pair2_staking, pair2_lpt) = suite
         .create_pair_staking(juno.clone(), asdf.clone())
@@ -59,7 +59,7 @@ fn native_rewards_work() {
     suite
         .create_distribution_flow(
             "owner",
-            vec![juno.clone(), wynd_info],
+            vec![juno.clone(), paloma_info],
             juno.clone(),
             vec![(SECONDS_PER_DAY * 7, Decimal::one())],
         )
@@ -196,14 +196,14 @@ fn cw20_rewards_work(mut suite: Suite) {
         .unwrap();
 
     // create cw20 token
-    let wynd = suite.instantiate_token("owner", "WYND");
-    let wynd_info = AssetInfo::Token(wynd.to_string());
+    let paloma = suite.instantiate_token("owner", "PALOMA");
+    let paloma_info = AssetInfo::Token(paloma.to_string());
 
     let juno = AssetInfo::Native("juno".to_string());
     let asdf = AssetInfo::Native("asdf".to_string());
     // create pairs to reward
     let (pair1_staking, pair1_lpt) = suite
-        .create_pair_staking(juno.clone(), wynd_info.clone())
+        .create_pair_staking(juno.clone(), paloma_info.clone())
         .unwrap();
     let (pair2_staking, pair2_lpt) = suite
         .create_pair_staking(juno.clone(), asdf.clone())
@@ -233,7 +233,7 @@ fn cw20_rewards_work(mut suite: Suite) {
     suite
         .create_distribution_flow(
             "owner",
-            vec![juno.clone(), wynd_info],
+            vec![juno.clone(), paloma_info],
             AssetInfo::Token(reward_contract.to_string()),
             vec![(SECONDS_PER_DAY * 7, Decimal::one())],
         )

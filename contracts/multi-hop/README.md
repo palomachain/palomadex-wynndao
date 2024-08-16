@@ -1,6 +1,6 @@
-# Wyndex Router
+# PalomaDex Router
 
-The Router contract contains logic to facilitate multi-hop swaps for Terra native & Wyndex tokens.
+The Router contract contains logic to facilitate multi-hop swaps for Terra native & PalomaDex tokens.
 
 ---
 
@@ -10,11 +10,11 @@ For every swap, the contract checks if the resulting token is the one that was a
 
 ## InstantiateMsg
 
-Initializes the contract with the Wyndex factory contract address.
+Initializes the contract with the PalomaDex factory contract address.
 
 ```json
 {
-  "wyndex_factory": "terra..."
+  "palomadex_factory": "paloma..."
 }
 ```
 
@@ -36,7 +36,7 @@ CW20 receive msg.
 
 ### `execute_swap_operation`
 
-Swaps one token to another. _single_ defines whether this swap is single or part of a multi hop route. 
+Swaps one token to another. _single_ defines whether this swap is single or part of a multi hop route.
 This message is for internal use.
 
 ### Example
@@ -47,15 +47,15 @@ Swap UST => mABNB
 {
    "execute_swap_operation": {
      "operation": {
-        "wyndex_swap": {
+        "palomadex_swap": {
           "offer_asset_info": {
             "native_token": {
-              "denom": "uusd"
+              "denom": "ugrain"
             }
           },
           "ask_asset_info": {
             "token": {
-              "contract_addr": "terra..."
+              "contract_addr": "paloma..."
             }
           }
         }
@@ -69,7 +69,7 @@ Swap UST => mABNB
 
 ### `execute_swap_operations`
 
-Performs multi-hop swap operations for native & Wyndex tokens. Swaps execute one-by-one and the last swap will return the ask token. This function is public (can be called by anyone).
+Performs multi-hop swap operations for native & PalomaDex tokens. Swaps execute one-by-one and the last swap will return the ask token. This function is public (can be called by anyone).
 
 ### Example
 
@@ -86,7 +86,7 @@ Swap KRT => UST => mABNB
         }
       },
       {
-        "wyndex_swap": {
+        "palomadex_swap": {
           "offer_asset_info": {
             "native_token": {
               "denom": "uusd"
@@ -158,7 +158,7 @@ Simulates multi-hop swap operations. Examples:
         }
       },
       {
-        "wyndex_swap": {
+        "palomadex_swap": {
           "offer_asset_info": {
             "native_token": {
               "denom": "uusd"
@@ -190,7 +190,7 @@ Simulates multi-hop swap operations. Examples:
       }
     },
     {
-      "wyndex_swap": {
+      "palomadex_swap": {
         "offer_asset_info": {
           "token": {
             "contract_addr": "terra..."

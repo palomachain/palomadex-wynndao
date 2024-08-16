@@ -1,7 +1,7 @@
 use crate::state::Config;
 use cosmwasm_std::{Decimal256, Fraction, StdError, StdResult, Uint128, Uint256, Uint64};
 use itertools::Itertools;
-use wyndex::asset::{AssetInfoValidated, Decimal256Ext, DecimalAsset};
+use palomadex::asset::{AssetInfoValidated, Decimal256Ext, DecimalAsset};
 
 /// The maximum number of calculation steps for Newton's method.
 const ITERATIONS: u8 = 32;
@@ -184,9 +184,9 @@ fn inverse_rate(to: &AssetInfoValidated, y: Uint128, config: &Config) -> Uint128
 mod tests {
     use super::*;
     use cosmwasm_std::{Uint128, Uint256};
+    use palomadex::asset::native_asset;
+    use palomadex::querier::NATIVE_TOKEN_PRECISION;
     use sim::StableSwapModel;
-    use wyndex::asset::native_asset;
-    use wyndex::querier::NATIVE_TOKEN_PRECISION;
 
     #[test]
     fn test_compute_d() {

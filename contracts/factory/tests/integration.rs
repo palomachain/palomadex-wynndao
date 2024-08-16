@@ -1,19 +1,19 @@
 mod factory_helper;
 
 use cosmwasm_std::{attr, from_slice, Addr, Decimal, StdError, Uint128};
-use wyndex::asset::AssetInfo;
-use wyndex::factory::{
+use palomadex::asset::AssetInfo;
+use palomadex::factory::{
     ConfigResponse, DefaultStakeConfig, ExecuteMsg, FeeInfoResponse, InstantiateMsg, MigrateMsg,
     PairConfig, PairType, PartialDefaultStakeConfig, QueryMsg,
 };
-use wyndex::fee_config::FeeConfig;
-use wyndex::pair::PairInfo;
-use wyndex_factory::{error::ContractError, state::Config};
+use palomadex::fee_config::FeeConfig;
+use palomadex::pair::PairInfo;
+use palomadex_factory::{error::ContractError, state::Config};
 
 use crate::factory_helper::{instantiate_token, FactoryHelper};
 use cw_multi_test::{App, ContractWrapper, Executor};
 use cw_placeholder::msg::InstantiateMsg as PlaceholderContractInstantiateMsg;
-use wyndex::pair::ExecuteMsg as PairExecuteMsg;
+use palomadex::pair::ExecuteMsg as PairExecuteMsg;
 fn mock_app() -> App {
     App::default()
 }
@@ -31,12 +31,11 @@ fn store_placeholder_code(app: &mut App) -> u64 {
 fn store_factory_code(app: &mut App) -> u64 {
     let factory_contract = Box::new(
         ContractWrapper::new_with_empty(
-            wyndex_factory::contract::execute,
-            wyndex_factory::contract::instantiate,
-            wyndex_factory::contract::query,
+            palomadex_factory::contract::execute,
+            palomadex_factory::contract::instantiate,
+            palomadex_factory::contract::query,
         )
-        .with_reply_empty(wyndex_factory::contract::reply)
-        .with_migrate_empty(wyndex_factory::contract::migrate),
+        .with_reply_empty(palomadex_factory::contract::reply),
     );
 
     app.store_code(factory_contract)

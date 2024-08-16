@@ -1,7 +1,7 @@
 use std::collections::HashSet;
 
 use cosmwasm_std::{Addr, Deps, DepsMut, Env, MessageInfo, Response, StdResult, Storage, Uint128};
-use wyndex::asset::{AssetInfo, AssetInfoExt, AssetInfoValidated};
+use palomadex::asset::{AssetInfo, AssetInfoExt, AssetInfoValidated};
 
 use crate::error::ContractError;
 use crate::msg::{

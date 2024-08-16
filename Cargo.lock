@@ -801,13 +801,13 @@ dependencies = [
  "cw2 1.0.1",
  "cw20 1.0.1",
  "cw20-base 1.0.1",
+ "palomadex",
+ "palomadex-factory",
+ "palomadex-pair",
+ "palomadex-pair-lsd",
+ "palomadex-stake",
  "thiserror",
  "wynd-utils 1.6.0 (git+https://github.com/wynddao/wynddao.git?tag=v1.6.0)",
- "wyndex 2.2.0",
- "wyndex-factory 2.2.0",
- "wyndex-pair",
- "wyndex-pair-lsd",
- "wyndex-stake 2.2.0",
 ]
 
 [[package]]
@@ -941,14 +941,14 @@ dependencies = [
  "cw20 1.0.1",
  "cw20-base 0.10.3",
  "cw20-base 1.0.1",
+ "palomadex",
+ "palomadex-factory",
+ "palomadex-pair",
+ "palomadex-stake",
  "serde",
  "stake-cw20",
  "thiserror",
  "wasmswap",
- "wyndex 2.2.0",
- "wyndex-factory 2.2.0",
- "wyndex-pair",
- "wyndex-stake 2.2.0",
 ]
 
 [[package]]
@@ -1005,12 +1005,12 @@ dependencies = [
  "cw2 1.0.1",
  "cw20 1.0.1",
  "cw20-base 1.0.1",
+ "palomadex",
+ "palomadex-factory",
+ "palomadex-pair",
+ "palomadex-stake",
  "thiserror",
  "wynd-lsd-hub",
- "wyndex 2.2.0",
- "wyndex-factory 2.2.0",
- "wyndex-pair",
- "wyndex-stake 2.2.0",
 ]
 
 [[package]]
@@ -1032,13 +1032,13 @@ dependencies = [
  "cw2 1.0.1",
  "cw20 1.0.1",
  "cw20-base 1.0.1",
+ "palomadex",
+ "palomadex-factory",
+ "palomadex-multi-hop",
+ "palomadex-pair",
+ "palomadex-pair-lsd",
+ "palomadex-stake",
  "thiserror",
- "wyndex 2.2.0",
- "wyndex-factory 2.2.0",
- "wyndex-multi-hop",
- "wyndex-pair",
- "wyndex-pair-lsd",
- "wyndex-stake 2.2.0",
 ]
 
 [[package]]
@@ -1062,6 +1062,127 @@ name = "opaque-debug"
 version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "624a8340c38c1b80fd549087862da4ba43e08858af025b236e509b6649fc13d5"
+
+[[package]]
+name = "palomadex"
+version = "2.2.0"
+dependencies = [
+ "cosmwasm-schema",
+ "cosmwasm-std",
+ "cw-storage-plus 1.1.0",
+ "cw-utils 1.0.1",
+ "cw20 1.0.1",
+ "cw20-base 1.0.1",
+ "itertools",
+ "thiserror",
+ "uint",
+]
+
+[[package]]
+name = "palomadex-factory"
+version = "2.2.0"
+dependencies = [
+ "anyhow",
+ "cosmwasm-schema",
+ "cosmwasm-std",
+ "cw-multi-test",
+ "cw-placeholder 2.2.0",
+ "cw-storage-plus 1.1.0",
+ "cw-utils 1.0.1",
+ "cw2 1.0.1",
+ "cw20 1.0.1",
+ "cw20-base 1.0.1",
+ "itertools",
+ "palomadex",
+ "palomadex-pair",
+ "palomadex-stake",
+ "thiserror",
+ "wyndex-factory",
+]
+
+[[package]]
+name = "palomadex-multi-hop"
+version = "2.2.0"
+dependencies = [
+ "anyhow",
+ "cosmwasm-schema",
+ "cosmwasm-std",
+ "cw-multi-test",
+ "cw-storage-plus 1.1.0",
+ "cw-utils 1.0.1",
+ "cw2 1.0.1",
+ "cw20 1.0.1",
+ "cw20-base 1.0.1",
+ "palomadex",
+ "palomadex-factory",
+ "palomadex-pair",
+ "palomadex-stake",
+ "thiserror",
+]
+
+[[package]]
+name = "palomadex-pair"
+version = "2.2.0"
+dependencies = [
+ "cosmwasm-schema",
+ "cosmwasm-std",
+ "cw-multi-test",
+ "cw-storage-plus 1.1.0",
+ "cw-utils 1.0.1",
+ "cw2 1.0.1",
+ "cw20 1.0.1",
+ "cw20-base 1.0.1",
+ "palomadex",
+ "palomadex-factory",
+ "palomadex-stake",
+ "proptest",
+]
+
+[[package]]
+name = "palomadex-pair-lsd"
+version = "2.2.0"
+dependencies = [
+ "anyhow",
+ "cosmwasm-schema",
+ "cosmwasm-std",
+ "cw-multi-test",
+ "cw-storage-plus 1.1.0",
+ "cw-utils 1.0.1",
+ "cw2 1.0.1",
+ "cw20 1.0.1",
+ "cw20-base 1.0.1",
+ "derivative",
+ "itertools",
+ "palomadex",
+ "palomadex-factory",
+ "palomadex-pair",
+ "palomadex-stake",
+ "proptest",
+]
+
+[[package]]
+name = "palomadex-stake"
+version = "2.2.0"
+dependencies = [
+ "anyhow",
+ "cosmwasm-schema",
+ "cosmwasm-std",
+ "cw-controllers 1.0.1",
+ "cw-multi-test",
+ "cw-storage-plus 1.1.0",
+ "cw-utils 1.0.1",
+ "cw2 1.0.1",
+ "cw20 1.0.1",
+ "cw20-base 1.0.1",
+ "lp-converter",
+ "palomadex",
+ "serde",
+ "test-case",
+ "thiserror",
+ "wynd-utils 1.6.0 (git+https://github.com/wynddao/wynddao.git?tag=v1.6.0)",
+ "wyndex 2.0.2",
+ "wyndex-stake 2.0.2",
+]
 
 [[package]]
 name = "pkcs8"
@@ -1242,14 +1363,14 @@ dependencies = [
  "cw20 1.0.1",
  "cw20-base 0.10.3",
  "cw20-base 1.0.1",
+ "palomadex",
+ "palomadex-factory",
+ "palomadex-pair",
+ "palomadex-stake",
  "serde",
  "stake-cw20",
  "thiserror",
  "wasmswap",
- "wyndex 2.2.0",
- "wyndex-factory 2.2.0",
- "wyndex-pair",
- "wyndex-stake 2.2.0",
 ]
 
 [[package]]
@@ -1578,11 +1699,11 @@ dependencies = [
  "cw-multi-test",
  "cw20 1.0.1",
  "cw20-base 1.0.1",
- "wyndex 2.2.0",
- "wyndex-factory 2.2.0",
- "wyndex-multi-hop",
- "wyndex-pair",
- "wyndex-stake 2.2.0",
+ "palomadex",
+ "palomadex-factory",
+ "palomadex-multi-hop",
+ "palomadex-pair",
+ "palomadex-stake",
 ]
 
 [[package]]
@@ -1817,21 +1938,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "wyndex"
-version = "2.2.0"
-dependencies = [
- "cosmwasm-schema",
- "cosmwasm-std",
- "cw-storage-plus 1.1.0",
- "cw-utils 1.0.1",
- "cw20 1.0.1",
- "cw20-base 1.0.1",
- "itertools",
- "thiserror",
- "uint",
-]
-
-[[package]]
 name = "wyndex-factory"
 version = "2.1.0"
 source = "git+https://github.com/wynddao/wynddex?tag=v2.1.0#a578f8b645433e108a10613e85ae49385c2fc63c"
@@ -1846,88 +1952,6 @@ dependencies = [
  "thiserror",
  "wyndex 2.1.0",
  "wyndex-stake 2.1.0",
-]
-
-[[package]]
-name = "wyndex-factory"
-version = "2.2.0"
-dependencies = [
- "anyhow",
- "cosmwasm-schema",
- "cosmwasm-std",
- "cw-multi-test",
- "cw-placeholder 2.2.0",
- "cw-storage-plus 1.1.0",
- "cw-utils 1.0.1",
- "cw2 1.0.1",
- "cw20 1.0.1",
- "cw20-base 1.0.1",
- "itertools",
- "thiserror",
- "wyndex 2.2.0",
- "wyndex-factory 2.1.0",
- "wyndex-pair",
- "wyndex-stake 2.2.0",
-]
-
-[[package]]
-name = "wyndex-multi-hop"
-version = "2.2.0"
-dependencies = [
- "anyhow",
- "cosmwasm-schema",
- "cosmwasm-std",
- "cw-multi-test",
- "cw-storage-plus 1.1.0",
- "cw-utils 1.0.1",
- "cw2 1.0.1",
- "cw20 1.0.1",
- "cw20-base 1.0.1",
- "thiserror",
- "wyndex 2.2.0",
- "wyndex-factory 2.2.0",
- "wyndex-pair",
- "wyndex-stake 2.2.0",
-]
-
-[[package]]
-name = "wyndex-pair"
-version = "2.2.0"
-dependencies = [
- "cosmwasm-schema",
- "cosmwasm-std",
- "cw-multi-test",
- "cw-storage-plus 1.1.0",
- "cw-utils 1.0.1",
- "cw2 1.0.1",
- "cw20 1.0.1",
- "cw20-base 1.0.1",
- "proptest",
- "wyndex 2.2.0",
- "wyndex-factory 2.2.0",
- "wyndex-stake 2.2.0",
-]
-
-[[package]]
-name = "wyndex-pair-lsd"
-version = "2.2.0"
-dependencies = [
- "anyhow",
- "cosmwasm-schema",
- "cosmwasm-std",
- "cw-multi-test",
- "cw-storage-plus 1.1.0",
- "cw-utils 1.0.1",
- "cw2 1.0.1",
- "cw20 1.0.1",
- "cw20-base 1.0.1",
- "derivative",
- "itertools",
- "proptest",
- "wyndex 2.2.0",
- "wyndex-factory 2.2.0",
- "wyndex-pair",
- "wyndex-stake 2.2.0",
 ]
 
 [[package]]
@@ -1964,30 +1988,6 @@ dependencies = [
  "thiserror",
  "wynd-utils 1.6.0 (git+https://github.com/cosmorama/wynddao.git?tag=v1.6.0)",
  "wyndex 2.1.0",
-]
-
-[[package]]
-name = "wyndex-stake"
-version = "2.2.0"
-dependencies = [
- "anyhow",
- "cosmwasm-schema",
- "cosmwasm-std",
- "cw-controllers 1.0.1",
- "cw-multi-test",
- "cw-storage-plus 1.1.0",
- "cw-utils 1.0.1",
- "cw2 1.0.1",
- "cw20 1.0.1",
- "cw20-base 1.0.1",
- "lp-converter",
- "serde",
- "test-case",
- "thiserror",
- "wynd-utils 1.6.0 (git+https://github.com/wynddao/wynddao.git?tag=v1.6.0)",
- "wyndex 2.0.2",
- "wyndex 2.2.0",
- "wyndex-stake 2.0.2",
 ]
 
 [[package]]

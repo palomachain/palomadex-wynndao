@@ -6,7 +6,7 @@ use cw_storage_plus::Item;
 pub struct MigrateConfig {
     /// This is the address that can run ExecuteMsg::MigrateTokens
     pub migrator: Addr,
-    /// This is how long it will be staked on WYND DEX
+    /// This is how long it will be staked on PALOMA DEX
     pub unbonding_period: u64,
 
     /// This is the junoswap pool where the LP will be withdrawn from
@@ -15,7 +15,7 @@ pub struct MigrateConfig {
     /// Can be deposited in any pool created by this factory
     pub factory: Addr,
     /// If set, only can be deposited in this pool (which must also be created by the factory)
-    pub wynddex_pool: Option<Addr>,
+    pub palomadex_pool: Option<Addr>,
 
     /// This is set when token migration is finished.
     /// It is used to calculate the amount of LP tokens to give to each staker.
@@ -25,11 +25,11 @@ pub struct MigrateConfig {
 /// The necessary information to migrate stakers.
 #[cw_serde]
 pub struct MigrateStakersConfig {
-    /// The wyndex LP token contract
+    /// The palomadex LP token contract
     pub lp_token: Addr,
-    /// The wyndex LP staking contract
+    /// The palomadex LP staking contract
     pub staking_addr: Addr,
-    /// The total amount of wyndex LP tokens this contract received after token migration.
+    /// The total amount of palomadex LP tokens this contract received after token migration.
     pub total_lp_tokens: Uint128,
     /// The total amount of staked junoswap LP tokens.
     pub total_staked: Uint128,
@@ -43,9 +43,9 @@ pub const DESTINATION: Item<Addr> = Item::new("destination");
 
 #[cw_serde]
 pub struct ExchangeConfig {
-    pub raw_to_wynd_exchange_rate: Decimal,
+    pub raw_to_grain_exchange_rate: Decimal,
     pub raw_token: Addr,
-    pub wynd_token: Addr,
+    pub grain_token: Addr,
 }
 
 pub const EXCHANGE_CONFIG: Item<ExchangeConfig> = Item::new("exchange_config");

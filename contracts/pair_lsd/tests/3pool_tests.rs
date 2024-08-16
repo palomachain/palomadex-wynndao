@@ -2,8 +2,8 @@ use cosmwasm_std::Addr;
 use itertools::Itertools;
 
 use helper::AppExtension;
-use wyndex::asset::AssetInfoExt;
-use wyndex::pair::ContractError;
+use palomadex::asset::AssetInfoExt;
+use palomadex::pair::ContractError;
 
 use crate::helper::{Helper, TestCoin};
 

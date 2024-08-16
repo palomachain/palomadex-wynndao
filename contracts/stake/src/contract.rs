@@ -9,10 +9,10 @@ use cosmwasm_std::{
 use cw20::{Cw20ExecuteMsg, Cw20ReceiveMsg};
 use cw_controllers::Claim;
 use cw_storage_plus::Map;
-use wyndex::asset::{addr_opt_validate, AssetInfo, AssetInfoValidated};
-use wyndex::common::validate_addresses;
-use wyndex::lp_converter::ExecuteMsg as ConverterExecuteMsg;
-use wyndex::stake::{FundingInfo, InstantiateMsg, ReceiveMsg, UnbondingPeriod};
+use palomadex::asset::{addr_opt_validate, AssetInfo, AssetInfoValidated};
+use palomadex::common::validate_addresses;
+use palomadex::lp_converter::ExecuteMsg as ConverterExecuteMsg;
+use palomadex::stake::{FundingInfo, InstantiateMsg, ReceiveMsg, UnbondingPeriod};
 
 use crate::distribution::{
     apply_points_correction, execute_delegate_withdrawal, execute_distribute_rewards,
@@ -37,10 +37,6 @@ use wynd_curve_utils::Curve;
 
 const SECONDS_PER_YEAR: u64 = 365 * 24 * 60 * 60;
 
-// version info for migration info
-const CONTRACT_NAME: &str = concat!("crates.io:", env!("CARGO_CRATE_NAME"));
-const CONTRACT_VERSION: &str = env!("CARGO_PKG_VERSION");
-
 // Note, you can use StdResult in some functions where you do not
 // make use of the custom errors
 #[cfg_attr(not(feature = "library"), entry_point)]
@@ -50,7 +46,6 @@ pub fn instantiate(
     info: MessageInfo,
     mut msg: InstantiateMsg,
 ) -> Result<Response, ContractError> {
-    set_contract_version(deps.storage, CONTRACT_NAME, CONTRACT_VERSION)?;
     let api = deps.api;
     // Set the admin if provided
     ADMIN.set(deps.branch(), maybe_addr(api, msg.admin.clone())?)?;
@@ -1303,38 +1298,13 @@ pub fn query_unbond_all(deps: Deps) -> StdResult<UnbondAllResponse> {
     })
 }
 
-/// Manages the contract migration.
-#[cfg_attr(not(feature = "library"), entry_point)]
-pub fn migrate(deps: DepsMut, _env: Env, msg: MigrateMsg) -> Result<Response, ContractError> {
-    ensure_from_older_version(deps.storage, CONTRACT_NAME, CONTRACT_VERSION)?;
-
-    // add unbonder to config
-    let mut config = CONFIG.load(deps.storage)?;
-    config.unbonder = addr_opt_validate(deps.api, &msg.unbonder)?;
-    config.converter = msg
-        .converter
-        .map(|c| {
-            StdResult::Ok(ConverterConfig {
-                contract: deps.api.addr_validate(&c.contract)?,
-                pair_to: deps.api.addr_validate(&c.pair_to)?,
-            })
-        })
-        .transpose()?;
-    CONFIG.save(deps.storage, &config)?;
-
-    // set unbond all flag
-    UNBOND_ALL.save(deps.storage, &msg.unbond_all)?;
-
-    Ok(Response::new())
-}
-
 #[cfg(test)]
 mod tests {
     use cosmwasm_std::testing::{mock_dependencies, mock_env, mock_info};
     use cosmwasm_std::{from_slice, Coin, CosmosMsg, Decimal, WasmMsg};
     use cw_controllers::Claim;
     use cw_utils::Duration;
-    use wyndex::asset::{native_asset_info, token_asset_info};
+    use palomadex::asset::{native_asset_info, token_asset_info};
 
     use crate::error::ContractError;
     use crate::msg::{DistributionDataResponse, WithdrawAdjustmentDataResponse};
@@ -1353,11 +1323,6 @@ mod tests {
     const UNBONDING_PERIOD_2: u64 = 2 * UNBONDING_PERIOD;
     const CW20_ADDRESS: &str = "wasm1234567890";
     const DENOM: &str = "juno";
-
-    #[test]
-    fn check_crate_name() {
-        assert_eq!(CONTRACT_NAME, "crates.io:wyndex_stake");
-    }
 
     fn default_instantiate(deps: DepsMut, env: Env) {
         cw20_instantiate(

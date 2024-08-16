@@ -1,12 +1,12 @@
 [package]
 name = "junoswap-staking"
-authors = ["Cosmorama <cosmorama@proton.me>"]
+authors = ["Volume Fi"]
 version = { workspace = true }
 edition = { workspace = true }
-description = "Contract aimed just for migration - take JunoSwap staked LP and migrate to WYND DEX"
+description = "Contract aimed just for migration - take JunoSwap staked LP and migrate to PALOMA DEX"
 license = { workspace = true }
 repository = { workspace = true }
-homepage = "https://www.wynddao.com"
+homepage = "https://www.palomachain.com"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -28,9 +28,9 @@ cw20 = { workspace = true }
 cw-utils = { workspace = true }
 thiserror = { workspace = true }
 
-wyndex = { workspace = true }
-wyndex-factory = { workspace = true }
-wyndex-stake = { workspace = true }
+palomadex = { workspace = true }
+palomadex-factory = { workspace = true }
+palomadex-stake = { workspace = true }
 # this is old version of cw20 used by wasmswap
 wasmswap_cw20 = { package = "cw20", version = "0.10.0" }
 # this is the staking contract we are migrating from (use the state variables there)
@@ -44,6 +44,6 @@ cw-multi-test = { workspace = true }
 serde = { workspace = true }
 wasmswap_cw20-base = { package = "cw20-base", version = "0.10.0" }
 wasmswap_cw-utils = { package = "cw-utils", version = "0.11" }
-wyndex-factory = { workspace = true }
-wyndex-pair = { workspace = true }
+palomadex-factory = { workspace = true }
+palomadex-pair = { workspace = true }
 cw20-base = { workspace = true }

@@ -1,9 +1,9 @@
 [package]
-name = "wyndex-multi-hop"
+name = "palomadex-multi-hop"
 version = { workspace = true }
-authors = ["Cosmorama <cosmorama@proton.me>"]
+authors = ["Volume Fi"]
 edition = { workspace = true }
-description = "Wyndex Multi-hop - provides multi-hop swap functionality for wyndex pools"
+description = "PalomaDex Multi-hop - provides multi-hop swap functionality for palomadex pools"
 license = { workspace = true }
 
 [lib]
@@ -21,12 +21,12 @@ cw2 = { workspace = true }
 cw20 = { workspace = true }
 cw-utils = { workspace = true }
 thiserror = { workspace = true }
-wyndex = { workspace = true }
+palomadex = { workspace = true }
 
 [dev-dependencies]
 anyhow = { workspace = true }
 cw-multi-test = { workspace = true }
 cw20-base = { workspace = true }
-wyndex-factory = { workspace = true }
-wyndex-pair = { workspace = true }
-wyndex-stake = { workspace = true }
+palomadex-factory = { workspace = true }
+palomadex-pair = { workspace = true }
+palomadex-stake = { workspace = true }

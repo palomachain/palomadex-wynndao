@@ -31,7 +31,7 @@ pub use utils::*;
 /// Decimal precision for TWAP results
 pub const TWAP_PRECISION: u8 = 6;
 
-/// This structure stores the main parameters for an Wyndex pair
+/// This structure stores the main parameters for an Palomadex pair
 #[cw_serde]
 pub struct PairInfo {
     /// Asset information for the assets in the pool
@@ -163,7 +163,7 @@ impl StakeConfig {
             })?,
             funds: vec![],
             admin: Some(factory_owner),
-            label: String::from("Wyndex-Stake"),
+            label: String::from("Palomadex-Stake"),
         })
     }
 }

@@ -1,7 +1,7 @@
 use cosmwasm_schema::cw_serde;
 use cosmwasm_std::Addr;
 use cw_storage_plus::Item;
-use wyndex::asset::AssetValidated;
+use palomadex::asset::AssetValidated;
 
 #[cw_serde]
 pub struct Config {

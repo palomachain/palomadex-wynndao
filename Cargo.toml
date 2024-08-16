@@ -5,19 +5,19 @@ members = ["packages/*", "contracts/*", "tests", "utils/*"]
 version = "2.2.0"
 edition = "2021"
 license = "GPL 3.0"
-repository = "https://github.com/cosmorama/wynddex"
+repository = "https://github.com/volumefi/palomadex"
 
 [workspace.dependencies]
 anyhow = "1"
-wyndex = { path = "./packages/wyndex", default-features = false }
+palomadex = { path = "./packages/palomadex", default-features = false }
 wynd-curve-utils = { git = "https://github.com/wynddao/wynddao.git", tag = "v1.6.0", package = "wynd-utils" }
 cw20-base = { version = "1.0", package = "cw20-base", features = ["library"] }
-wyndex-factory = { path = "./contracts/factory" }
+palomadex-factory = { path = "./contracts/factory" }
 cw-placeholder = { path = "./contracts/cw-placeholder" }
-wyndex-pair = { path = "./contracts/pair" }
-wyndex-pair-lsd = { path = "./contracts/pair_lsd" }
-wyndex-multi-hop = { path = "./contracts/multi-hop" }
-wyndex-stake = { path = "./contracts/stake" }
+palomadex-pair = { path = "./contracts/pair" }
+palomadex-pair-lsd = { path = "./contracts/pair_lsd" }
+palomadex-multi-hop = { path = "./contracts/multi-hop" }
+palomadex-stake = { path = "./contracts/stake" }
 wynd-lsd-hub = { git = "https://github.com/wynddao/wynd-lsd.git", version = "1.2.1", features = [
     "library",
 ] }
@@ -26,7 +26,7 @@ cosmwasm-schema = "1.1"
 cosmwasm-std = "1.1"
 cw2 = "1.0"
 cw20 = "1.0"
-semver                  = "1"
+semver = "1"
 cw-controllers = "1.0"
 cw-multi-test = "0.16"
 cw-storage-plus = "1.0"
@@ -41,23 +41,23 @@ uint = "0.9"
 wyndex-stake-2_0_0 = { package = "wyndex-stake", git = "https://github.com/wynddao/wynddex", tag = "v2.0.0" }
 
 
-[profile.release.package.wyndex-factory]
+[profile.release.package.palomadex-factory]
 codegen-units = 1
 incremental = false
 
-[profile.release.package.wyndex-multi-hop]
+[profile.release.package.palomadex-multi-hop]
 codegen-units = 1
 incremental = false
 
-[profile.release.package.wyndex-pair]
+[profile.release.package.palomadex-pair]
 codegen-units = 1
 incremental = false
 
-[profile.release.package.wyndex-pair-lsd]
+[profile.release.package.palomadex-pair-lsd]
 codegen-units = 1
 incremental = false
 
-[profile.release.package.wyndex-stake]
+[profile.release.package.palomadex-stake]
 codegen-units = 1
 incremental = false
 

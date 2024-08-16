@@ -2,12 +2,12 @@ use cosmwasm_std::{Decimal, Decimal256, Deps, Env, StdResult, Storage, Uint128, 
 use itertools::Itertools;
 use std::cmp::Ordering;
 
-use wyndex::asset::{AssetInfoValidated, Decimal256Ext, DecimalAsset};
-use wyndex::pair::TWAP_PRECISION;
+use palomadex::asset::{AssetInfoValidated, Decimal256Ext, DecimalAsset};
+use palomadex::pair::TWAP_PRECISION;
 
 use crate::math::{apply_rate, calc_y};
 use crate::state::{get_precision, Config};
-use wyndex::pair::ContractError;
+use palomadex::pair::ContractError;
 
 /// Select offer and ask pools based on given offer and ask infos.
 /// This function works with pools with up to 5 assets. Returns (offer_pool, ask_pool) in case of success.

@@ -7,5 +7,5 @@ pub const CONFIG: Item<Config> = Item::new("config");
 #[cw_serde]
 pub struct Config {
     /// The factory contract address
-    pub wyndex_factory: Addr,
+    pub palomadex_factory: Addr,
 }

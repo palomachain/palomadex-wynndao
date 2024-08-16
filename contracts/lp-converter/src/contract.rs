@@ -2,10 +2,10 @@
 use cosmwasm_std::entry_point;
 use cosmwasm_std::{Binary, Deps, DepsMut, Env, MessageInfo, Reply, Response, StdResult};
 use cw2::set_contract_version;
+use palomadex::lp_converter::ExecuteMsg;
 use wynd_lsd_hub::msg::{
     ConfigResponse as HubConfigResponse, QueryMsg as HubQueryMsg, SupplyResponse,
 };
-use wyndex::lp_converter::ExecuteMsg;
 
 use crate::error::ContractError;
 use crate::msg::{InstantiateMsg, QueryMsg};
@@ -14,10 +14,6 @@ use crate::state::{Config, CONFIG};
 const WITHDRAW_LIQUIDITY_REPLY_ID: u64 = 1;
 const BOND_REPLY_ID: u64 = 2;
 const PROVIDE_LIQUIDITY_REPLY_ID: u64 = 3;
-
-// version info for migration info
-pub const CONTRACT_NAME: &str = "crates.io:wynd-lp-converter";
-const CONTRACT_VERSION: &str = env!("CARGO_PKG_VERSION");
 
 #[cfg_attr(not(feature = "library"), entry_point)]
 pub fn instantiate(
@@ -44,7 +40,6 @@ pub fn instantiate(
     };
     CONFIG.save(deps.storage, &config)?;
 
-    set_contract_version(deps.storage, CONTRACT_NAME, CONTRACT_VERSION)?;
     Ok(Response::default())
 }
 
@@ -92,7 +87,7 @@ pub fn query(_deps: Deps, _env: Env, _msg: QueryMsg) -> StdResult<Binary> {
 mod execute {
     use cosmwasm_std::{to_binary, SubMsg, Uint128, WasmMsg};
     use cw20::Cw20ExecuteMsg;
-    use wyndex::{
+    use palomadex::{
         asset::AssetInfoValidated,
         pair::{Cw20HookMsg, PairInfo, QueryMsg as PairQueryMsg},
     };
@@ -163,13 +158,13 @@ mod execute {
 mod reply {
     use cosmwasm_std::{to_binary, Coin, Decimal, SubMsg, WasmMsg};
     use cw20::Cw20ExecuteMsg;
-    use wynd_lsd_hub::msg::ExecuteMsg as HubExecuteMsg;
-    use wyndex::stake::ReceiveMsg;
-    use wyndex::{
+    use palomadex::stake::ReceiveMsg;
+    use palomadex::{
         asset::{AssetInfo, AssetInfoExt},
         pair::{ExecuteMsg as PairExecuteMsg, PairInfo, QueryMsg as PairQueryMsg},
         querier::query_token_balance,
     };
+    use wynd_lsd_hub::msg::ExecuteMsg as HubExecuteMsg;
 
     use crate::state::TMP_DATA;
 

@@ -163,7 +163,7 @@ pub fn query_pair_info(
 }
 
 /// Returns a vector that contains items of type [`PairInfo`] which
-/// symbolize pairs instantiated in the Wyndex factory
+/// symbolize pairs instantiated in the Palomadex factory
 pub fn query_pairs_info(
     querier: &QuerierWrapper,
     factory_contract: impl Into<String>,

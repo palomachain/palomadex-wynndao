@@ -6,10 +6,9 @@ use cosmwasm_std::{
     to_binary, Addr, Binary, CosmosMsg, Decimal, Deps, DepsMut, Env, MessageInfo, Order, Response,
     StdResult, SubMsg, Uint128, WasmMsg,
 };
-use cw2::set_contract_version;
 
 use cw20::Cw20ExecuteMsg;
-use wyndex::asset::{Asset, AssetInfo};
+use palomadex::asset::{Asset, AssetInfo};
 
 use crate::error::ContractError;
 use crate::msg::{
@@ -21,10 +20,6 @@ use crate::utils::{
     ROUTES_INITIAL_DEPTH,
 };
 
-// version info for migration info
-const CONTRACT_NAME: &str = "crates.io:nominated-trader";
-const CONTRACT_VERSION: &str = env!("CARGO_PKG_VERSION");
-
 #[cfg_attr(not(feature = "library"), entry_point)]
 pub fn instantiate(
     deps: DepsMut,
@@ -32,8 +27,6 @@ pub fn instantiate(
     info: MessageInfo,
     msg: InstantiateMsg,
 ) -> Result<Response, ContractError> {
-    set_contract_version(deps.storage, CONTRACT_NAME, CONTRACT_VERSION)?;
-
     let config = Config {
         owner: info.sender,
         nominated_trader: deps.api.addr_validate(&msg.nominated_trader)?,
@@ -112,7 +105,7 @@ pub fn collect_fees_to_base_token(
     assets: Vec<AssetWithLimit>,
 ) -> Result<Response, ContractError> {
     let cfg = CONFIG.load(deps.storage)?;
-    let wynd: AssetInfo = cfg.token_contract.clone().into();
+    let paloma: AssetInfo = cfg.token_contract.clone().into();
 
     // Permission check
     if info.sender != cfg.nominated_trader {
@@ -131,12 +124,12 @@ pub fn collect_fees_to_base_token(
         return Err(ContractError::DuplicatedAsset {});
     }
 
-    // Swap all non WYND tokens to Wynd
+    // Swap all non Grain tokens to Paloma
     let response = swap_assets(
         deps.as_ref(),
         &env.contract.address,
         &cfg,
-        assets.into_iter().filter(|a| a.info != wynd).collect(),
+        assets.into_iter().filter(|a| a.info != paloma).collect(),
         None,
     )?;
     Ok(response)
@@ -298,11 +291,11 @@ fn swap_hop_assets(
     Ok(response.add_attribute("action", "swap_route_assets"))
 }
 
-/// Adds or removes defined routes used to swap fee tokens to WYND.
+/// Adds or removes defined routes used to swap fee tokens to PALOMA.
 ///
-/// * **add** array of routes defining hops needed to swap fee tokens to Wynd.
+/// * **add** array of routes defining hops needed to swap fee tokens to Paloma.
 ///
-/// * **remove** array of routes defining hops needed to swap fee tokens to Wynd.
+/// * **remove** array of routes defining hops needed to swap fee tokens to Paloma.
 ///
 /// ## Executor
 /// Only the owner can execute this.
@@ -330,18 +323,18 @@ fn update_routes(
             );
         }
     }
-    let wynd = AssetInfo::Token(cfg.token_contract.to_string());
+    let paloma = AssetInfo::Token(cfg.token_contract.to_string());
     // Add new routes
     if let Some(routes_to_add) = add {
         for (asset, route) in routes_to_add {
             // Verify asset is not same as route
-            // Check that route tokens can be swapped to WYND
+            // Check that route tokens can be swapped to PALOMA
             validate_route(
                 deps.as_ref(),
                 &cfg.dex_factory_contract,
                 &asset,
                 &route,
-                &wynd,
+                &paloma,
                 ROUTES_INITIAL_DEPTH,
                 None,
             )?;
@@ -394,7 +387,7 @@ fn query_get_balances(deps: Deps, env: Env, assets: Vec<AssetInfo>) -> StdResult
     Ok(resp)
 }
 
-/// Returns route tokens used for swapping fee tokens to WYND.
+/// Returns route tokens used for swapping fee tokens to PALOMA.
 fn query_routes(deps: Deps) -> StdResult<Vec<(String, String)>> {
     ROUTES
         .range(deps.storage, None, None, Order::Ascending)

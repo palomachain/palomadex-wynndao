@@ -1,12 +1,12 @@
 [package]
-name = "wyndex"
+name = "palomadex"
 version = { workspace = true }
-authors = ["Cosmorama <cosmorama@proton.me>"]
+authors = ["Volume Fi"]
 edition = { workspace = true }
-description = "Common Wyndex types, queriers and other utils"
+description = "Common PalomaDex types, queriers and other utils"
 license = { workspace = true }
 repository = { workspace = true }
-homepage = "https://www.wynddao.com"
+homepage = "https://www.palomachain.com"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

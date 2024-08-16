@@ -5,17 +5,12 @@ use cosmwasm_std::{
     MessageInfo, Response, StdResult, WasmMsg,
 };
 
-use cw2::set_contract_version;
 use cw20::{BalanceResponse, Cw20ExecuteMsg, Cw20QueryMsg};
 use cw_utils::ensure_from_older_version;
 
 use crate::msg::{ExecuteMsg, InstantiateMsg, MigrateMsg, QueryMsg};
 use crate::state::{Config, CONFIG};
 use crate::ContractError;
-
-// version info for migration info
-const CONTRACT_NAME: &str = "crates.io:cw-splitter";
-const CONTRACT_VERSION: &str = env!("CARGO_PKG_VERSION");
 
 #[cfg_attr(not(feature = "library"), entry_point)]
 pub fn instantiate(
@@ -24,8 +19,6 @@ pub fn instantiate(
     _info: MessageInfo,
     msg: InstantiateMsg,
 ) -> Result<Response, ContractError> {
-    set_contract_version(deps.storage, CONTRACT_NAME, CONTRACT_VERSION)?;
-
     let addresses = validate_addresses(deps.as_ref(), msg.addresses)?;
     let cw20_addresses = msg
         .cw20_contracts
@@ -175,31 +168,6 @@ pub fn query(deps: Deps, _env: Env, msg: QueryMsg) -> StdResult<Binary> {
     match msg {
         QueryMsg::Config {} => to_binary(&CONFIG.load(deps.storage)?),
     }
-}
-
-#[cfg_attr(not(feature = "library"), entry_point)]
-pub fn migrate(deps: DepsMut, _env: Env, msg: MigrateMsg) -> Result<Response, ContractError> {
-    // needed safety check
-    ensure_from_older_version(deps.storage, CONTRACT_NAME, CONTRACT_VERSION)?;
-
-    CONFIG.remove(deps.storage);
-
-    let addresses = validate_addresses(deps.as_ref(), msg.new_addresses)?;
-    let cw20_addresses = msg
-        .new_cw20_contracts
-        .into_iter()
-        .map(|addr| deps.api.addr_validate(&addr))
-        .collect::<StdResult<Vec<_>>>()?;
-
-    CONFIG.save(
-        deps.storage,
-        &Config {
-            addresses,
-            cw20_addresses,
-        },
-    )?;
-
-    Ok(Response::new())
 }
 
 #[cfg(test)]
@@ -390,7 +358,7 @@ mod tests {
                 .init_balance(
                     storage,
                     &Addr::unchecked("owner"),
-                    vec![coin(1_000_000, "ujuno"), coin(200_000, "wynd")],
+                    vec![coin(1_000_000, "ujuno"), coin(200_000, "grain")],
                 )
                 .unwrap()
         });
@@ -427,7 +395,7 @@ mod tests {
             Addr::unchecked("owner"),
             BankMsg::Send {
                 to_address: splitter_contract.to_string(),
-                amount: vec![coin(200_000, "wynd")],
+                amount: vec![coin(200_000, "grain")],
             }
             .into(),
         )
@@ -438,7 +406,7 @@ mod tests {
             Addr::unchecked("owner"),
             splitter_contract,
             &ExecuteMsg::SendTokens {
-                native_denoms: vec!["ujuno".to_owned(), "wynd".to_owned()],
+                native_denoms: vec!["ujuno".to_owned(), "grain".to_owned()],
                 cw20_addresses: None,
             },
             &[],
@@ -449,13 +417,13 @@ mod tests {
             app.wrap()
                 .query_all_balances("address1".to_owned())
                 .unwrap(),
-            vec![coin(330_000u128, "ujuno"), coin(66_000u128, "wynd")]
+            vec![coin(330_000u128, "ujuno"), coin(66_000u128, "grain")]
         );
         assert_eq!(
             app.wrap()
                 .query_all_balances("address2".to_owned())
                 .unwrap(),
-            vec![coin(670_000u128, "ujuno"), coin(134_000u128, "wynd")]
+            vec![coin(670_000u128, "ujuno"), coin(134_000u128, "grain")]
         );
     }
 
@@ -467,7 +435,7 @@ mod tests {
                 .init_balance(
                     storage,
                     &Addr::unchecked("owner"),
-                    vec![coin(1_000_000, "ujuno"), coin(200_000, "wynd")],
+                    vec![coin(1_000_000, "ujuno"), coin(200_000, "grain")],
                 )
                 .unwrap()
         });
@@ -504,7 +472,7 @@ mod tests {
             Addr::unchecked("owner"),
             BankMsg::Send {
                 to_address: splitter_contract.to_string(),
-                amount: vec![coin(200_000, "wynd")],
+                amount: vec![coin(200_000, "grain")],
             }
             .into(),
         )
@@ -514,7 +482,7 @@ mod tests {
             Addr::unchecked("owner"),
             splitter_contract.clone(),
             &ExecuteMsg::SendTokens {
-                native_denoms: vec!["wynd".to_owned()],
+                native_denoms: vec!["grain".to_owned()],
                 cw20_addresses: None,
             },
             &[],
@@ -525,13 +493,13 @@ mod tests {
             app.wrap()
                 .query_all_balances("address1".to_owned())
                 .unwrap(),
-            vec![coin(66_000u128, "wynd")]
+            vec![coin(66_000u128, "grain")]
         );
         assert_eq!(
             app.wrap()
                 .query_all_balances("address2".to_owned())
                 .unwrap(),
-            vec![coin(134_000u128, "wynd")]
+            vec![coin(134_000u128, "grain")]
         );
         // make sure other tokens are still on splitter contract's balance
         assert_eq!(

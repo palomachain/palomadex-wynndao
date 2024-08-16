@@ -1,6 +1,6 @@
 use cosmwasm_std::StdError;
+use palomadex::asset::AssetInfo;
 use thiserror::Error;
-use wyndex::asset::AssetInfo;
 
 #[derive(Error, Debug)]
 pub enum ContractError {
