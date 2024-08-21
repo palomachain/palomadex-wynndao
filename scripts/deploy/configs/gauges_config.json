@@ -1,0 +1,33 @@
+{
+    "orchestrator": {
+        "label": "gauge v1.3.0-beta",
+        "instantiate": {
+            "voting_powers": "juno1yep3ej3uhpkuqhmesfzmrs0agheq3q2xzsc0dhncqkdh3llg8qvs0rqeke",
+            "owner": "paloma1al324k42hg47fz3qdnuy2s7wcfw8agny8gujmh"
+        }
+    },
+    "adapters": [
+        {
+            "label": "gauge-adapter v1.3.0-beta ugrain",
+            "instantiate": {
+                "factory": "paloma1sthrn5ep8ls5vzz8f9gp89khhmedahhdqd244dh9uqzk3hx2pzrsr8facx",
+                "rewards_asset": {
+                    "info": {
+                        "native": "ujunox"
+                    },
+                    "amount": "10000"
+                }
+            }
+        }
+    ],
+    "gauges": [
+        {
+            "create_gauge": {
+                "title": "gauge rewards juno",
+                "adapter": "juno12zemtrhy4u4e9utnp88g7zh4ragccvalq8uarldlvtjqyna8t60qsh5cm8",
+                "epoch_size": 86400,
+                "max_options_selected": 3
+            }
+        }
+    ]
+}

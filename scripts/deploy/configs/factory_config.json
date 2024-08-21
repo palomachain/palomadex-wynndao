@@ -1,0 +1,77 @@
+{
+    "label": "palomadex-factory v2.2.0",
+    "instantiate": {
+        "owner": "paloma1al324k42hg47fz3qdnuy2s7wcfw8agny8gujmh",
+        "token_code_id": 6,
+        "pair_configs": [
+            {
+                "code_id": 7,
+                "pair_type": {
+                    "xyk": {}
+                },
+                "fee_config": {
+                    "total_fee_bps": 30,
+                    "protocol_fee_bps": 3333
+                },
+                "is_disabled": false
+            },
+            {
+                "code_id": 8,
+                "pair_type": {
+                    "stable": {}
+                },
+                "fee_config": {
+                    "total_fee_bps": 10,
+                    "protocol_fee_bps": 3333
+                },
+                "is_disabled": false
+            }
+        ],
+        "max_referral_commission": "0.05",
+        "fee_address": "paloma1al324k42hg47fz3qdnuy2s7wcfw8agny8gujmh",
+        "default_stake_config": {
+            "staking_code_id": 9,
+            "tokens_per_power": "1",
+            "min_bond": "1",
+            "unbonding_periods": [
+                86400,
+                172800,
+                259200,
+                345600
+            ],
+            "max_distributions": 6
+        }
+    },
+    "create_pairs": [
+        {
+            "create_pair_and_distribution_flows": {
+                "pair_type": {
+                    "xyk": {}
+                },
+                "asset_infos": [
+                    {
+                        "native": "ugrain"
+                    },
+                    {
+                        "token": "paloma1hw3ej0swtn6sm2anzlndkhkfd3xpltnrggc6rmj8y0v7pta8cqcq9tjlus"
+                    }
+                ],
+                "staking_config": {},
+                "distribution_flows": [
+                    {
+                        "asset": {
+                            "native": "ugrain"
+                        },
+                        "rewards": [
+                            [86400, "0.25"],
+                            [172800, "0.6"],
+                            [259200, "0.8"],
+                            [345600, "0.9"]
+                        ],
+                        "reward_duration": 86400
+                    }
+                ]
+            }
+        }
+    ]
+}
