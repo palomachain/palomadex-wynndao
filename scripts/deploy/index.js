@@ -1,7 +1,11 @@
 #!/usr/bin/env -S yarn node
 
 /* eslint-disable @typescript-eslint/naming-convention */
-const {GasPrice, calculateFee, DirectSecp256k1HdWallet, SigningCosmWasmClient, makeCosmoshubPath} = require("cosmwasm");
+const { assertIsBroadcastTxSuccess, SigningCosmWasmClient, CosmWasmClient } = require("@cosmjs/cosmwasm-stargate");
+const { DirectSecp256k1HdWallet } = require("@cosmjs/proto-signing");
+const { stringToPath } = require("@cosmjs/crypto");
+const { GasPrice, calculateFee } = require("@cosmjs/stargate");
+
 const {env} = require("process");
 
 const fs = require("fs");
@@ -31,34 +35,32 @@ function getMnemonic() {
 }
 
 async function connect(mnemonic, palomaConfig) {
-    const {prefix, gasPrice, feeToken, rpcEndpoint} = palomaConfig;
-    const hdPath = makeCosmoshubPath(0);
+    const { prefix, gasPrice, feeToken, rpcEndpoint } = palomaConfig;
+    const hdPath = stringToPath("m/44'/118'/0'/0/0");
 
     // Setup signer
-    const offlineSigner = await DirectSecp256k1HdWallet.fromMnemonic(mnemonic, {prefix, hdPaths: [hdPath]});
-    const {address} = (await offlineSigner.getAccounts())[0];
+    const wallet = await DirectSecp256k1HdWallet.fromMnemonic(mnemonic, { prefix, hdPaths: [hdPath] });
+    const [firstAccount] = await wallet.getAccounts();
+    const address = firstAccount.address;
     console.info(`Connected to ${address}`);
 
     // Init SigningCosmWasmClient client
     try {
-        const client = await SigningCosmWasmClient.connectWithSigner(rpcEndpoint, offlineSigner, {
-            prefix,
-            gasPrice,
-        });
+        const client = await SigningCosmWasmClient.connectWithSigner(rpcEndpoint, wallet, { gasPrice: GasPrice.fromString(gasPrice) });
         const balance = await client.getBalance(address, feeToken);
         console.info(`Balance: ${balance.amount} ${balance.denom}\n`);
 
         const chainId = await client.getChainId();
-        console.info(`chain id: ${chainId}`);
+        console.info(`Chain ID: ${chainId}`);
 
         if (chainId !== palomaConfig.chainId) {
-            throw Error("Given ChainId doesn't match the clients ChainID!");
+            throw new Error("Given ChainId doesn't match the client's ChainID!");
         }
 
-        return {client, address};
+        return { client, address };
     } catch (error) {
         console.error("Error during connectWithSigner:", error.message);
-        throw error; // Re-throw other errors
+        throw error;
     }
 }
 
