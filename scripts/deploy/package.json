@@ -10,7 +10,7 @@
   "author": "Jakub Bogucki <jakub@moonbite.space>",
   "license": "ISC",
   "dependencies": {
-    "@cosmjs/cosmwasm-stargate": "^0.28.3",
+    "@cosmjs/cosmwasm-stargate": "^0.32.4",
     "stdio": "^2.1.1"
   }
 }

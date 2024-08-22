@@ -140,29 +140,40 @@ async function createPairsAndDistributionFlows(client, wallet, gasPriceS, config
     const gasPrice = GasPrice.fromString(gasPriceS);
     const executeFee = calculateFee(1_500_000, gasPrice);
 
-    var pairs = [];
+    let pairs = [];
 
-    for (var i = 0; i < config.create_pairs.length; i++) {
+    for (let i = 0; i < config.create_pairs.length; i++) {
         const result = await client.execute(
             wallet,
             factoryAddress,
             config.create_pairs[i],
             executeFee
         );
-        const wasmEvent = result.logs[0].events.find((e) => e.type === "wasm").attributes;
-        const pairName = wasmEvent.find(function (element) {
-            return element.key === 'pair'
+
+        // Correctly filter the wasm events
+        const wasmEvents = result.events.filter((e) => e.type.trim() === "wasm");
+
+        if (wasmEvents.length === 0) {
+            console.error("No 'wasm' events found. Full result:", JSON.stringify(result, (key, value) =>
+                typeof value === 'bigint' ? value.toString() : value, null, 2));
+            throw new Error("No 'wasm' events found.");
+        }
+
+        // Extract the relevant attributes from the wasm events
+        wasmEvents.forEach((event) => {
+            const pairName = event.attributes.find(attr => attr.key === 'pair');
+            const pairAddress = event.attributes.find(attr => attr.key === 'pair_contract_addr');
+
+            if (pairName && pairAddress) {
+                const pairInfo = {
+                    pairName: pairName.value,
+                    pairAddress: pairAddress.value,
+                };
+                console.info(`Pair initialized:\n${JSON.stringify(pairInfo, null, 4)}\n`);
+                pairs.push(pairInfo);
+            }
         });
-        const pairAddress = wasmEvent.find(function (element) {
-            return element.key === 'pair_contract_addr'
-        });
-        const pairInfo = {
-            pairName: pairName.value,
-            pairAddress: pairAddress.value,
-        };
-        console.info(`Pair initialized:\n${JSON.stringify(pairInfo, null, 4)}\n`);
-        pairs.push(pairInfo);
-    };
+    }
 
     return pairs;
 }
@@ -256,7 +267,7 @@ async function main() {
 
     // factory
     const factoryConfig = JSON.parse(fs.readFileSync(factoryConfigPath, 'utf8'));
-    const factoryAddress = "paloma1sthrn5ep8ls5vzz8f9gp89khhmedahhdqd244dh9uqzk3hx2pzrsr8facx"; // await instantiateContract(client, address, palomaConfig.gasPrice, factoryConfig, factoryCodeId);
+    const factoryAddress = await instantiateContract(client, address, palomaConfig.gasPrice, factoryConfig, factoryCodeId);
 
     await stdio.ask("Update configs/multi_hop_config.json and configs/gauges_config.json using factory's address from above and press ENTER to continue", function () {});
     console.info('');
@@ -269,14 +280,14 @@ async function main() {
     const pairs = await createPairsAndDistributionFlows(client, address, palomaConfig.gasPrice, factoryConfig, factoryAddress);
 
     // gauges
-    const gaugesConfig = JSON.parse(fs.readFileSync(gaugesConfigPath, 'utf8'));
-    const gaugeOrchestratorAddress = await instantiateContract(client, address, palomaConfig.gasPrice, gaugesConfig.orchestrator, gaugeOrchestratorCodeId);
-    const gaugeAdapters = await instantiateGaugeAdapters(client, address, palomaConfig.gasPrice, gaugeAdapterCodeId, gaugesConfig.adapters);
+    // const gaugesConfig = JSON.parse(fs.readFileSync(gaugesConfigPath, 'utf8'));
+    // const gaugeOrchestratorAddress = await instantiateContract(client, address, palomaConfig.gasPrice, gaugesConfig.orchestrator, gaugeOrchestratorCodeId);
+    // const gaugeAdapters = await instantiateGaugeAdapters(client, address, palomaConfig.gasPrice, gaugeAdapterCodeId, gaugesConfig.adapters);
 
-    await stdio.ask("Update configs/gauges_config.json and paste proper gaugeAdapter addresses into proper create_gauge messages; press ENTER when ready to continue", function () {});
-    console.info('');
+    // await stdio.ask("Update configs/gauges_config.json and paste proper gaugeAdapter addresses into proper create_gauge messages; press ENTER when ready to continue", function () {});
+    // console.info('');
 
-    const gauges = await createGauges(client, address, palomaConfig.gasPrice, gaugesConfig.gauges, gaugeOrchestratorAddress);
+    // const gauges = await createGauges(client, address, palomaConfig.gasPrice, gaugesConfig.gauges, gaugeOrchestratorAddress);
 
     // save output to logfile
     const raport = {
@@ -291,9 +302,9 @@ async function main() {
         factoryAddress: factoryAddress,
         multiHopAddress: multiHopAddress,
         pairs: pairs,
-        gaugeOrchestratorAddress: gaugeOrchestratorAddress,
-        gaugeAdapters: gaugeAdapters,
-        gauges: gauges
+        // gaugeOrchestratorAddress: gaugeOrchestratorAddress,
+        // gaugeAdapters: gaugeAdapters,
+        // gauges: gauges
     };
     fs.writeFileSync("result.json", JSON.stringify(raport, null, 4), "utf8");
     console.info("Result was saved to result.json file!");
