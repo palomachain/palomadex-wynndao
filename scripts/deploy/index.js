@@ -24,6 +24,9 @@ const pairWasmPath = "/contracts/wyndex_pair.wasm";
 const pairStableWasmPath = "/contracts/wyndex_pair_stable.wasm";
 const stakeWasmPath = "/contracts/wyndex_stake.wasm";
 const tokenWasmPath = "/contracts/cw20_base.wasm";
+const daoCoreWasmPath = "/contracts/dao_core.wasm";
+const proposalSingleWasmPath = "/contracts/proposal_single.wasm";
+const cw4StakeWasmPath = "/contracts/cw4_stake.wasm";
 
 // Check "MNEMONIC" env variable and ensure it is set to a reasonable value
 function getMnemonic() {
@@ -178,6 +181,76 @@ async function createPairsAndDistributionFlows(client, wallet, gasPriceS, config
     return pairs;
 }
 
+async function instantiateDaoCoreWithModules(client, wallet, gasPriceS, daoCoreCodeId, cw4StakeCodeId, proposalSingleCodeId, cw20Contract) {
+    console.info('Instantiating DAO Core with modules...');
+
+    const gasPrice = GasPrice.fromString(gasPriceS);
+    const instantiateFee = calculateFee(1_000_000, gasPrice);
+
+    const daoCoreInstantiateMsg = {
+        admin: wallet,
+        name: "My DAO",
+        description: "Description of My DAO",
+        image_url: "https://example.com/image.png",
+        automatically_add_cw20s: true,
+        automatically_add_cw721s: true,
+        voting_module_instantiate_info: {
+            code_id: cw4StakeCodeId,
+            msg: Buffer.from(JSON.stringify({
+                cw20_contract: cw20Contract,  // Replace with actual CW20 token contract address
+                tokens_per_power: "1000000",  // Adjust as per requirement
+                min_bond: "1000000",  // Adjust as per requirement
+                stake_config: [],  // Adjust as per requirement
+                admin: wallet  // Admin is the wallet
+            })).toString('base64'),
+            admin: { address: wallet },  // Set admin to the wallet address
+            funds: [],
+            label: "CW4 Stake Voting Module"
+        },
+        proposal_modules_instantiate_info: [
+            {
+                code_id: proposalSingleCodeId,
+                msg: Buffer.from(JSON.stringify({
+                    threshold: {
+                        threshold_quorum: {
+                            quorum: "0.1",  // 10% quorum
+                            threshold: "0.5"  // 50% threshold
+                        }
+                    },
+                    max_voting_period: { time: 604800 },  // 7 days in seconds
+                    min_voting_period: { time: 86400 },  // 1 day in seconds
+                    only_members_execute: false,
+                    allow_revoting: true,
+                    pre_propose_info: { anyone_may_propose: {} },  // Adjust as per requirements
+                    close_proposal_on_execution_failure: true,
+                    veto: null
+                })).toString('base64'),
+                admin: { address: wallet },  // Set admin to the wallet address
+                funds: [],
+                label: "Proposal Single Module"
+            }
+        ],
+        initial_items: [],
+        dao_uri: "https://mydao.org"  // Optional DAO URI
+    };
+
+    // Instantiate DAO Core with the voting and proposal modules
+    const { contractAddress: daoCoreAddress } = await client.instantiate(
+        wallet,
+        daoCoreCodeId,
+        daoCoreInstantiateMsg,
+        "DAO Core with Modules",
+        instantiateFee,
+        {
+            memo: "Instantiation of DAO Core with voting and proposal modules",
+            admin: wallet,
+        }
+    );
+
+    console.info(`DAO Core instantiated at ${daoCoreAddress} with voting and proposal modules\n`);
+    return daoCoreAddress;
+}
+
 async function instantiateGaugeAdapters(client, wallet, gasPriceS, codeId, config) {
     console.info('Instantiating gauge adapters...');
 
@@ -265,6 +338,30 @@ async function main() {
     await stdio.ask('\nUpdate configs/factory_config.json using proper codeIDs from above and press ENTER to continue', function () {});
     console.info('');
 
+    // CW20 token instantiation message with a high initial balance for the wallet
+    const cw20InstantiateMsg = {
+        name: "MyToken",
+        symbol: "MTK",
+        decimals: 6,
+        initial_balances: [{
+            address: address,  // The wallet address receiving the initial balance
+            amount: "1000000000"  // Set a high initial balance for the wallet (1,000,000 MTK)
+        }],
+        mint: {
+            minter: wallet,
+            cap: null  // No cap on minting
+        },
+        marketing: null  // Optional marketing information
+    };
+
+    // Instantiate CW20 Token Contract
+    const cw20TokenAddress = await instantiateContract(client, wallet, palomaConfig.gasPrice, {
+        label: "MyToken Contract",
+        instantiate: cw20InstantiateMsg
+    }, tokenCodeId);
+
+    console.info(`CW20 token contract instantiated at ${cw20TokenAddress}`);
+
     // factory
     const factoryConfig = JSON.parse(fs.readFileSync(factoryConfigPath, 'utf8'));
     const factoryAddress = await instantiateContract(client, address, palomaConfig.gasPrice, factoryConfig, factoryCodeId);
@@ -279,6 +376,15 @@ async function main() {
     // create pairs
     const pairs = await createPairsAndDistributionFlows(client, address, palomaConfig.gasPrice, factoryConfig, factoryAddress);
 
+    // INSTANTIATE THE DAO - DAO-CORE, CW-PROPOSAL-SINGLE AND WYND-STAKE
+    const daoCoreCodeId = await storeContract(client, wallet, palomaConfig.gasPrice, "dao-core", daoCoreWasmPath);
+    const proposalSingleCodeId = await storeContract(client, wallet, palomaConfig.gasPrice, "proposal-single", proposalSingleWasmPath);
+    const cw4StakeCodeId = await storeContract(client, wallet, palomaConfig.gasPrice, "cw4-stake", cw4StakeWasmPath);
+
+    // Instantiate DAO Core and its modules
+    const daoCoreAddress = await instantiateDaoCoreWithModules(client, wallet, palomaConfig.gasPrice, daoCoreCodeId, cw4StakeCodeId, proposalSingleCodeId, cw20Contract);
+
+    console.info(`DAO Core and its modules have been successfully instantiated. DAO Core Address: ${daoCoreAddress}`);
     // gauges
     // const gaugesConfig = JSON.parse(fs.readFileSync(gaugesConfigPath, 'utf8'));
     // const gaugeOrchestratorAddress = await instantiateContract(client, address, palomaConfig.gasPrice, gaugesConfig.orchestrator, gaugeOrchestratorCodeId);
