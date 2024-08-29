@@ -3,14 +3,14 @@
         "label": "gauge v1.3.0-beta",
         "instantiate": {
             "voting_powers": "paloma1al324k42hg47fz3qdnuy2s7wcfw8agny8gujmh",
-            "owner": "paloma1al324k42hg47fz3qdnuy2s7wcfw8agny8gujmh"
+            "owner": "paloma1zwskvpcpvplxacxef2ez5w9rpxcdkd54e9slnv"
         }
     },
     "adapters": [
         {
             "label": "gauge-adapter v1.3.0-beta ugrain",
             "instantiate": {
-                "factory": "paloma1sthrn5ep8ls5vzz8f9gp89khhmedahhdqd244dh9uqzk3hx2pzrsr8facx",
+                "factory": "paloma1r3zgdsn3dcze07a4r60rxxx7ppvkxfshn9np0pwtkgarrld0786sdssl9a",
                 "rewards_asset": {
                     "info": {
                         "native": "ugrains"

@@ -24,9 +24,9 @@ const pairWasmPath = "/contracts/wyndex_pair.wasm";
 const pairStableWasmPath = "/contracts/wyndex_pair_stable.wasm";
 const stakeWasmPath = "/contracts/wyndex_stake.wasm";
 const tokenWasmPath = "/contracts/cw20_base.wasm";
-const daoCoreWasmPath = "/contracts/dao_core.wasm";
-const proposalSingleWasmPath = "/contracts/proposal_single.wasm";
-const cw4StakeWasmPath = "/contracts/cw4_stake.wasm";
+const daoCoreWasmPath = "/contracts/dao_dao_core.wasm";
+const proposalSingleWasmPath = "/contracts/dao_proposal_single.wasm";
+const cw4StakeWasmPath = "/contracts/wynd_stake.wasm";
 
 // Check "MNEMONIC" env variable and ensure it is set to a reasonable value
 function getMnemonic() {
@@ -74,31 +74,17 @@ async function storeContract(client, wallet, gasPriceS, label, wasmPath) {
     const uploadFee = calculateFee(5_000_000, gasPrice);
 
     const wasmBinary = fs.readFileSync(__dirname + wasmPath);
-    try {
-        const uploadReceipt = await client.upload(
-            wallet,
-            wasmBinary,
-            uploadFee,
-            "Upload " + label + " contract",
-        );
-        console.info(label + " uploaded successfully. Receipt:\n" + JSON.stringify(uploadReceipt) + '\n');
+    const uploadReceipt = await client.upload(
+        wallet,
+        wasmBinary,
+        uploadFee,
+        "Upload " + label + " contract",
+    );
+    console.info(label + " uploaded successfully. Receipt:\n" + JSON.stringify(uploadReceipt, (key, value) =>
+            typeof value === 'bigint' ? value.toString() : value // Convert BigInt to string
+        ) + '\n');
 
-        return uploadReceipt.codeId;
-    } catch (error) {
-        if (error.message.includes("Invalid string. Length must be a multiple of 4")) {
-            console.warn("Warning: Ignoring the base64 error for " + label + ": " + error.message);
-            console.warn(`error: {}`, error);
-            // Continue execution or handle differently as needed
-            // Returning the codeId if it's present in the error response
-            const uploadReceipt = error.response?.uploadReceipt;
-            if (uploadReceipt && uploadReceipt.codeId) {
-                console.info(label + " uploaded with warnings. Receipt:\n" + JSON.stringify(uploadReceipt) + '\n');
-                return uploadReceipt.codeId;
-            }
-        } else {
-            throw error; // Re-throw other errors
-        }
-    }
+    return uploadReceipt.codeId;
 }
 
 async function instantiateContract(client, wallet, gasPriceS, config, codeId) {
@@ -107,34 +93,19 @@ async function instantiateContract(client, wallet, gasPriceS, config, codeId) {
     const gasPrice = GasPrice.fromString(gasPriceS);
     const instantiateFee = calculateFee(500_000, gasPrice);
 
-    try {
-        const {contractAddress} = await client.instantiate(
-            wallet,
-            codeId,
-            config.instantiate,
-            config.label,
-            instantiateFee,
-            {
-                memo: "Instantiation " + config.label,
-                admin: wallet,
-            },
-        );
-        console.info(config.label + ` contract instantiated at ${contractAddress}\n`);
-        return contractAddress;
-    } catch (error) {
-        if (error.message.includes("Invalid string. Length must be a multiple of 4")) {
-            console.warn("Warning: Ignoring the base64 error during instantiation of " + config.label + ": " + error.message);
-            console.warn(`error: {}`, error);
-            // Continue execution or handle differently as needed
-            const uploadReceipt = error.response?.uploadReceipt;
-            if (uploadReceipt && uploadReceipt.codeId) {
-                console.info(label + " uploaded with warnings. Receipt:\n" + JSON.stringify(uploadReceipt) + '\n');
-                return uploadReceipt.codeId;
-            }
-        } else {
-            throw error; // Re-throw other errors
-        }
-    }
+    const {contractAddress} = await client.instantiate(
+        wallet,
+        codeId,
+        config.instantiate,
+        config.label,
+        instantiateFee,
+        {
+            memo: "Instantiation " + config.label,
+            admin: wallet,
+        },
+    );
+    console.info(config.label + ` contract instantiated at ${contractAddress}\n`);
+    return contractAddress;
 }
 
 async function createPairsAndDistributionFlows(client, wallet, gasPriceS, config, factoryAddress) {
@@ -321,14 +292,14 @@ async function main() {
     const {client, address} = await connect(mnemonic, palomaConfig);
 
     // Store palomadex-stake, pair and pair-stable required for factory's instantiation
-    const tokenCodeId = 6; // await storeContract(client, address, palomaConfig.gasPrice, "token", tokenWasmPath);
-    const pairCodeId = 7; // await storeContract(client, address, palomaConfig.gasPrice, "pair", pairWasmPath);
-    const pairStableCodeId = 8; // await storeContract(client, address, palomaConfig.gasPrice, "pair-stable", pairStableWasmPath);
-    const stakeCodeId = 9; // await storeContract(client, address, palomaConfig.gasPrice, "stake", stakeWasmPath);
-    const factoryCodeId = 5; // await storeContract(client, address, palomaConfig.gasPrice, "factory", factoryWasmPath);
-    const multiHopCodeId = 10; // await storeContract(client, address, palomaConfig.gasPrice, "multi-hop", multiHopWasmPath);
-    const gaugeOrchestratorCodeId = 11; // await storeContract(client, address, palomaConfig.gasPrice, "gauge-orchestrator", gaugeOrchestratorWasmPath);
-    const gaugeAdapterCodeId = 12; // await storeContract(client, address, palomaConfig.gasPrice, "gauge-adapter", gaugeAdapterWasmPath);
+    const tokenCodeId = 17; // await storeContract(client, address, palomaConfig.gasPrice, "token", tokenWasmPath);
+    const pairCodeId = 18; // await storeContract(client, address, palomaConfig.gasPrice, "pair", pairWasmPath);
+    const pairStableCodeId = 19; // await storeContract(client, address, palomaConfig.gasPrice, "pair-stable", pairStableWasmPath);
+    const stakeCodeId = 20; // await storeContract(client, address, palomaConfig.gasPrice, "stake", stakeWasmPath);
+    const factoryCodeId = await storeContract(client, address, palomaConfig.gasPrice, "factory", factoryWasmPath);
+    const multiHopCodeId = await storeContract(client, address, palomaConfig.gasPrice, "multi-hop", multiHopWasmPath);
+    const gaugeOrchestratorCodeId = await storeContract(client, address, palomaConfig.gasPrice, "gauge-orchestrator", gaugeOrchestratorWasmPath);
+    const gaugeAdapterCodeId = await storeContract(client, address, palomaConfig.gasPrice, "gauge-adapter", gaugeAdapterWasmPath);
 
     console.info("token_code_id: " + tokenCodeId);
     console.info("pair_code_id: " + pairCodeId);
@@ -348,14 +319,14 @@ async function main() {
             amount: "1000000000"  // Set a high initial balance for the wallet (1,000,000 MTK)
         }],
         mint: {
-            minter: wallet,
+            minter: address,
             cap: null  // No cap on minting
         },
         marketing: null  // Optional marketing information
     };
 
     // Instantiate CW20 Token Contract
-    const cw20TokenAddress = await instantiateContract(client, wallet, palomaConfig.gasPrice, {
+    const cw20TokenAddress = await instantiateContract(client, address, palomaConfig.gasPrice, {
         label: "MyToken Contract",
         instantiate: cw20InstantiateMsg
     }, tokenCodeId);
@@ -377,23 +348,24 @@ async function main() {
     const pairs = await createPairsAndDistributionFlows(client, address, palomaConfig.gasPrice, factoryConfig, factoryAddress);
 
     // INSTANTIATE THE DAO - DAO-CORE, CW-PROPOSAL-SINGLE AND WYND-STAKE
-    const daoCoreCodeId = await storeContract(client, wallet, palomaConfig.gasPrice, "dao-core", daoCoreWasmPath);
-    const proposalSingleCodeId = await storeContract(client, wallet, palomaConfig.gasPrice, "proposal-single", proposalSingleWasmPath);
-    const cw4StakeCodeId = await storeContract(client, wallet, palomaConfig.gasPrice, "cw4-stake", cw4StakeWasmPath);
+    const daoCoreCodeId = await storeContract(client, address, palomaConfig.gasPrice, "dao-core", daoCoreWasmPath);
+    const proposalSingleCodeId = await storeContract(client, address, palomaConfig.gasPrice, "proposal-single", proposalSingleWasmPath);
+    const cw4StakeCodeId = await storeContract(client, address, palomaConfig.gasPrice, "cw4-stake", cw4StakeWasmPath);
 
     // Instantiate DAO Core and its modules
-    const daoCoreAddress = await instantiateDaoCoreWithModules(client, wallet, palomaConfig.gasPrice, daoCoreCodeId, cw4StakeCodeId, proposalSingleCodeId, cw20Contract);
+    const daoCoreAddress = await instantiateDaoCoreWithModules(client, address, palomaConfig.gasPrice, daoCoreCodeId, cw4StakeCodeId, proposalSingleCodeId, cw20Contract);
 
     console.info(`DAO Core and its modules have been successfully instantiated. DAO Core Address: ${daoCoreAddress}`);
+
     // gauges
-    // const gaugesConfig = JSON.parse(fs.readFileSync(gaugesConfigPath, 'utf8'));
-    // const gaugeOrchestratorAddress = await instantiateContract(client, address, palomaConfig.gasPrice, gaugesConfig.orchestrator, gaugeOrchestratorCodeId);
-    // const gaugeAdapters = await instantiateGaugeAdapters(client, address, palomaConfig.gasPrice, gaugeAdapterCodeId, gaugesConfig.adapters);
+    const gaugesConfig = JSON.parse(fs.readFileSync(gaugesConfigPath, 'utf8'));
+    const gaugeOrchestratorAddress = await instantiateContract(client, address, palomaConfig.gasPrice, gaugesConfig.orchestrator, gaugeOrchestratorCodeId);
+    const gaugeAdapters = await instantiateGaugeAdapters(client, address, palomaConfig.gasPrice, gaugeAdapterCodeId, gaugesConfig.adapters);
 
-    // await stdio.ask("Update configs/gauges_config.json and paste proper gaugeAdapter addresses into proper create_gauge messages; press ENTER when ready to continue", function () {});
-    // console.info('');
+    await stdio.ask("Update configs/gauges_config.json and paste proper gaugeAdapter addresses into proper create_gauge messages; press ENTER when ready to continue", function () {});
+    console.info('');
 
-    // const gauges = await createGauges(client, address, palomaConfig.gasPrice, gaugesConfig.gauges, gaugeOrchestratorAddress);
+    const gauges = await createGauges(client, address, palomaConfig.gasPrice, gaugesConfig.gauges, gaugeOrchestratorAddress);
 
     // save output to logfile
     const raport = {

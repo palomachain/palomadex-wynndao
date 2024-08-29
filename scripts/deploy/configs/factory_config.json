@@ -1,11 +1,11 @@
 {
     "label": "palomadex-factory v2.2.0",
     "instantiate": {
-        "owner": "paloma1al324k42hg47fz3qdnuy2s7wcfw8agny8gujmh",
-        "token_code_id": 6,
+        "owner": "paloma1zwskvpcpvplxacxef2ez5w9rpxcdkd54e9slnv",
+        "token_code_id": 17,
         "pair_configs": [
             {
-                "code_id": 7,
+                "code_id": 18,
                 "pair_type": {
                     "xyk": {}
                 },
@@ -16,7 +16,7 @@
                 "is_disabled": false
             },
             {
-                "code_id": 8,
+                "code_id": 19,
                 "pair_type": {
                     "stable": {}
                 },
@@ -28,9 +28,9 @@
             }
         ],
         "max_referral_commission": "0.05",
-        "fee_address": "paloma1al324k42hg47fz3qdnuy2s7wcfw8agny8gujmh",
+        "fee_address": "paloma1zwskvpcpvplxacxef2ez5w9rpxcdkd54e9slnv",
         "default_stake_config": {
-            "staking_code_id": 9,
+            "staking_code_id": 20,
             "tokens_per_power": "1",
             "min_bond": "1",
             "unbonding_periods": [
