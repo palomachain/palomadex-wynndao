@@ -284,8 +284,6 @@ async function createGauges(client, wallet, gasPriceS, messages, gaugeOrchestrat
     const gasPrice = GasPrice.fromString(gasPriceS);
     const executeFee = calculateFee(1_000_000, gasPrice);
 
-    var gauges = [];
-
     for (var i = 0; i < messages.length; i++) {
         const result = await client.execute(
             wallet,
@@ -293,19 +291,8 @@ async function createGauges(client, wallet, gasPriceS, messages, gaugeOrchestrat
             messages[i],
             executeFee
         );
-        const wasmEvent = result.logs[0].events.find((e) => e.type === "wasm").attributes;
-        const gaugeAddress = wasmEvent.find(function (element) {
-            return element.key === '_contract_address'
-        });
-        const gaugeInfo = {
-            gaugeLabel: messages[i].create_gauge.title,
-            gaugeAddress: gaugeAddress.value,
-        };
-        console.info(`Gauge initialized:\n${JSON.stringify(gaugeInfo, null, 4)}\n`);
-        gauges.push(gaugeInfo);
+        console.info(`Gauge initialized: ${messages[i].create_gauge.title}\n`);
     };
-
-    return gauges;
 }
 
 async function main() {
@@ -399,13 +386,11 @@ async function main() {
     // Instantiate gauge orchestrator
     const gaugeOrchestratorAddress = await instantiateContract(client, address, palomaConfig.gasPrice, gaugesConfig.orchestrator, gaugeOrchestratorCodeId);
 
-    // Update adapter config with correct gauge orchestrator address
-    gaugesConfig.adapters.forEach(adapter => {
-        adapter.instantiate.factory = factoryAddress;  // Update factory address for each adapter
-        adapter.instantiate.gauge_orchestrator = gaugeOrchestratorAddress; // Add gauge orchestrator address to each adapter
-    });
-
     const gaugeAdapters = await instantiateGaugeAdapters(client, address, palomaConfig.gasPrice, gaugeAdapterCodeId, gaugesConfig.adapters);
+
+    gaugesConfig.gauges.forEach(gauge => {
+        gauge.create_gauge.adapter = gaugeAdapters[0].address;
+    });
 
     // Save the updated gauges config with gauge orchestrator and adapters addresses
     writeJsonConfig(gaugesConfigPath, gaugesConfig);
@@ -425,9 +410,10 @@ async function main() {
         factoryAddress: factoryAddress,
         multiHopAddress: multiHopAddress,
         pairs: pairs,
-        // gaugeOrchestratorAddress: gaugeOrchestratorAddress,
-        // gaugeAdapters: gaugeAdapters,
-        // gauges: gauges
+        daoCore: daoCoreAddress,
+        gaugeOrchestratorAddress: gaugeOrchestratorAddress,
+        gaugeAdapters: gaugeAdapters,
+        gauges: gauges
     };
     fs.writeFileSync("result.json", JSON.stringify(raport, null, 4), "utf8");
     console.info("Result was saved to result.json file!");

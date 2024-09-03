@@ -1,6 +1,6 @@
 {
     "orchestrator": {
-        "label": "gauge v1.3.0-beta",
+        "label": "gauge orchestrator v1.3.0-beta",
         "instantiate": {
             "voting_powers": "paloma1al324k42hg47fz3qdnuy2s7wcfw8agny8gujmh",
             "owner": "paloma1zwskvpcpvplxacxef2ez5w9rpxcdkd54e9slnv"
@@ -10,13 +10,15 @@
         {
             "label": "gauge-adapter v1.3.0-beta ugrain",
             "instantiate": {
-                "factory": "paloma1r3zgdsn3dcze07a4r60rxxx7ppvkxfshn9np0pwtkgarrld0786sdssl9a",
+                "factory": "paloma1pt5d7rnkkz24sfutsld8c40r28py3jzgj95ml4ef7krtdr77xq0q47ufnv",
                 "rewards_asset": {
                     "info": {
                         "native": "ugrains"
                     },
                     "amount": "10000"
-                }
+                },
+                "epoch_length": 164000,
+                "owner": "paloma1zwskvpcpvplxacxef2ez5w9rpxcdkd54e9slnv"
             }
         }
     ],
@@ -24,7 +26,7 @@
         {
             "create_gauge": {
                 "title": "gauge rewards paloma",
-                "adapter": "paloma1sthrn5ep8ls5vzz8f9gp89khhmedahhdqd244dh9uqzk3hx2pzrsr8facx",
+                "adapter": "paloma1ttrgu24gmfxg0mymf02awyx2kaepvnz7k75zsn87s65kds86yepsc2g2ku",
                 "epoch_size": 86400,
                 "max_options_selected": 3
             }
