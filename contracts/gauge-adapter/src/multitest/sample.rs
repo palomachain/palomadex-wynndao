@@ -166,26 +166,6 @@ fn cw20_rewards_work_direct() {
     cw20_rewards_work(suite);
 }
 
-#[test]
-// Like the above test, but here we create the adapter via migration
-fn cw20_rewards_work_via_migration() {
-    let suite = SuiteBuilder::new()
-        .with_funds("owner", &[])
-        .with_stake_config(DefaultStakeConfig {
-            staking_code_id: 0,
-            tokens_per_power: 1000u128.into(),
-            min_bond: 1000u128.into(),
-            unbonding_periods: vec![SECONDS_PER_DAY * 7],
-            max_distributions: 5,
-            converter: None,
-        })
-        .with_cw20_reward(100)
-        .via_placeholder()
-        .build();
-
-    cw20_rewards_work(suite);
-}
-
 fn cw20_rewards_work(mut suite: Suite) {
     // FIXME: how does this work? AssetInfo::to_string() ?? not a cleaner way to unwrap the enum?
     let reward_contract = Addr::unchecked(suite.reward.info.to_string());
