@@ -126,11 +126,6 @@ impl SuiteBuilder {
         self
     }
 
-    pub fn via_placeholder(mut self) -> Self {
-        self.via_placeholder = true;
-        self
-    }
-
     pub fn with_native_reward(mut self, amount: u128, denom: &str) -> Self {
         self.reward = Asset {
             amount: amount.into(),

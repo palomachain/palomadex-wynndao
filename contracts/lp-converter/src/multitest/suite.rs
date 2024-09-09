@@ -121,11 +121,6 @@ impl SuiteBuilder {
         }
     }
 
-    pub fn without_converter(mut self) -> Self {
-        self.no_converter = true;
-        self
-    }
-
     pub fn with_native_balances(mut self, denom: &str, balances: Vec<(&str, u128)>) -> Self {
         self.native_balances
             .extend(balances.into_iter().map(|(addr, amount)| {
@@ -352,8 +347,6 @@ impl SuiteBuilder {
         Suite {
             app,
 
-            staking_code_id,
-
             converter,
             factory,
             native_pair,
@@ -369,7 +362,6 @@ impl SuiteBuilder {
 pub struct Suite {
     pub app: App,
 
-    staking_code_id: u64,
     pub converter: Addr,
     factory: Addr,
     pub native_pair: Addr,
@@ -546,19 +538,6 @@ impl Suite {
                 unbonding_period,
             },
             &[],
-        )
-    }
-
-    pub fn migrate_staking_contract(
-        &mut self,
-        pair: Pair,
-        msg: palomadex_stake::msg::MigrateMsg,
-    ) -> AnyResult<AppResponse> {
-        self.app.migrate_contract(
-            Addr::unchecked("owner"),
-            pair.staking_addr(self),
-            &msg,
-            self.staking_code_id, // same code id
         )
     }
 

@@ -3,8 +3,8 @@ mod factory_helper;
 use cosmwasm_std::{attr, from_slice, Addr, Decimal, StdError, Uint128};
 use palomadex::asset::AssetInfo;
 use palomadex::factory::{
-    ConfigResponse, DefaultStakeConfig, ExecuteMsg, FeeInfoResponse, InstantiateMsg, MigrateMsg,
-    PairConfig, PairType, PartialDefaultStakeConfig, QueryMsg,
+    ConfigResponse, DefaultStakeConfig, ExecuteMsg, FeeInfoResponse, InstantiateMsg, PairConfig,
+    PairType, PartialDefaultStakeConfig, QueryMsg,
 };
 use palomadex::fee_config::FeeConfig;
 use palomadex::pair::PairInfo;
@@ -12,20 +12,9 @@ use palomadex_factory::{error::ContractError, state::Config};
 
 use crate::factory_helper::{instantiate_token, FactoryHelper};
 use cw_multi_test::{App, ContractWrapper, Executor};
-use cw_placeholder::msg::InstantiateMsg as PlaceholderContractInstantiateMsg;
 use palomadex::pair::ExecuteMsg as PairExecuteMsg;
 fn mock_app() -> App {
     App::default()
-}
-
-fn store_placeholder_code(app: &mut App) -> u64 {
-    let placeholder_contract = Box::new(ContractWrapper::new_with_empty(
-        cw_placeholder::contract::execute,
-        cw_placeholder::contract::instantiate,
-        cw_placeholder::contract::query,
-    ));
-
-    app.store_code(placeholder_contract)
 }
 
 fn store_factory_code(app: &mut App) -> u64 {
@@ -867,80 +856,4 @@ fn check_update_owner() {
     let res: ConfigResponse = app.wrap().query_wasm_smart(&helper.factory, &msg).unwrap();
 
     assert_eq!(res.owner, new_owner)
-}
-
-#[test]
-fn can_migrate_the_placeholder_to_a_factory_properly() {
-    let mut app = mock_app();
-
-    let owner = Addr::unchecked("owner");
-
-    let place_holder_id = store_placeholder_code(&mut app);
-    let factory_id = store_factory_code(&mut app);
-
-    let pair_configs = vec![PairConfig {
-        code_id: 321,
-        pair_type: PairType::Xyk {},
-        fee_config: FeeConfig {
-            total_fee_bps: 100,
-            protocol_fee_bps: 10,
-        },
-        is_disabled: false,
-    }];
-    // Instantiate an instance of the placeholder contract which we will migrate
-    let placeholder = app
-        .instantiate_contract(
-            place_holder_id,
-            owner.clone(),
-            &PlaceholderContractInstantiateMsg {},
-            &[],
-            "placeholder",
-            Some(owner.clone().into_string()),
-        )
-        .unwrap();
-
-    let factory_msg = InstantiateMsg {
-        pair_configs: pair_configs.clone(),
-        token_code_id: 123,
-        fee_address: None,
-        owner: owner.to_string(),
-        max_referral_commission: Decimal::one(),
-        default_stake_config: default_stake_config(),
-        trading_starts: None,
-    };
-    // Migrate the contract
-    app.migrate_contract(
-        owner.clone(),
-        placeholder.clone(),
-        &MigrateMsg::Init(factory_msg.clone()),
-        factory_id,
-    )
-    .unwrap();
-
-    // Now instantiate a normal factory directly
-    let factory_instance = app
-        .instantiate_contract(
-            factory_id,
-            Addr::unchecked(owner.clone()),
-            &factory_msg,
-            &[],
-            "factory",
-            None,
-        )
-        .unwrap();
-    // To verify we will check configs, confirming its the same ConfigResponse and the same values
-    let msg = QueryMsg::Config {};
-    // Query the 'placeholder' which is now a Factory
-    let migrated_factory_config: ConfigResponse =
-        app.wrap().query_wasm_smart(&placeholder, &msg).unwrap();
-    let direct_factory_config: ConfigResponse =
-        app.wrap().query_wasm_smart(factory_instance, &msg).unwrap();
-
-    assert_eq!(123, migrated_factory_config.token_code_id);
-    assert_eq!(pair_configs, migrated_factory_config.pair_configs);
-    assert_eq!(owner, migrated_factory_config.owner);
-
-    assert_eq!(123, direct_factory_config.token_code_id);
-    assert_eq!(pair_configs, direct_factory_config.pair_configs);
-    assert_eq!(owner, direct_factory_config.owner);
 }

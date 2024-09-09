@@ -242,9 +242,9 @@ impl fmt::Display for AssetInfo {
 /// ## Examples
 /// ```
 /// # use cosmwasm_std::Addr;
-/// # use wyndex::asset::AssetInfo::{Native, Token};
+/// # use palomadex::asset::AssetInfo::{Native, Token};
 /// Token("terra...".to_string());
-/// Native(String::from("uluna"));
+/// Native(String::from("ugrain"));
 /// ```
 #[cw_serde]
 #[derive(Hash, Eq)]

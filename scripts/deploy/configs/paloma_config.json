@@ -1,0 +1,7 @@
+{
+    "chainId": "paloma-testnet-16",
+    "rpcEndpoint": "https://testnet.palomaswap.com",
+    "prefix": "paloma",
+    "gasPrice": "0.27ugrain",
+    "feeToken": "ugrain"
+}
