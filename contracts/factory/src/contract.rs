@@ -9,9 +9,9 @@ use palomadex::common::{
     claim_ownership, drop_ownership_proposal, propose_new_owner, validate_addresses,
 };
 use palomadex::factory::{
-    ConfigResponse, DistributionFlow, ExecuteMsg, FeeInfoResponse, InstantiateMsg, MigrateMsg,
-    PairConfig, PairType, PairsResponse, PartialDefaultStakeConfig, PartialStakeConfig, QueryMsg,
-    ReceiveMsg, ROUTE,
+    ConfigResponse, DistributionFlow, ExecuteMsg, FeeInfoResponse, InstantiateMsg, PairConfig,
+    PairType, PairsResponse, PartialDefaultStakeConfig, PartialStakeConfig, QueryMsg, ReceiveMsg,
+    ROUTE,
 };
 use palomadex::fee_config::FeeConfig;
 use palomadex::stake::UnbondingPeriod;
@@ -693,8 +693,8 @@ pub fn deregister_pool_and_staking(
                         Ok(pairs
                             .unwrap_or_default()
                             .iter()
+                            .filter(|&pair| pair != pair_addr)
                             .cloned()
-                            .filter(|pair| pair != pair_addr)
                             .collect::<Vec<_>>())
                     },
                 )?;

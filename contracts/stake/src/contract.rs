@@ -20,13 +20,12 @@ use crate::distribution::{
     query_undistributed_rewards, query_withdraw_adjustment_data, query_withdrawable_rewards,
 };
 use crate::utils::{create_undelegate_msg, CurveExt};
-use cw2::set_contract_version;
-use cw_utils::{ensure_from_older_version, maybe_addr, Expiration};
+use cw_utils::{maybe_addr, Expiration};
 
 use crate::error::ContractError;
 use crate::msg::{
     AllStakedResponse, AnnualizedReward, AnnualizedRewardsResponse, BondingInfoResponse,
-    BondingPeriodInfo, ExecuteMsg, MigrateMsg, QueryMsg, RewardsPowerResponse, StakedResponse,
+    BondingPeriodInfo, ExecuteMsg, QueryMsg, RewardsPowerResponse, StakedResponse,
     TotalStakedResponse, TotalUnbondingResponse, UnbondAllResponse,
 };
 use crate::state::{

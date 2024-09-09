@@ -1,7 +1,6 @@
 #[cfg(not(feature = "library"))]
 use cosmwasm_std::entry_point;
 use cosmwasm_std::{Binary, Deps, DepsMut, Env, MessageInfo, Reply, Response, StdResult};
-use cw2::set_contract_version;
 use palomadex::lp_converter::ExecuteMsg;
 use wynd_lsd_hub::msg::{
     ConfigResponse as HubConfigResponse, QueryMsg as HubQueryMsg, SupplyResponse,

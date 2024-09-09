@@ -11,7 +11,7 @@ use palomadex::stake::{FundingInfo, ReceiveMsg as StakeReceiveDelegationMsg};
 use palomadex_stake::msg::ExecuteMsg as StakeExecuteMsg;
 
 use crate::error::ContractError;
-use crate::msg::{AdapterQueryMsg, ExecuteMsg, InstantiateMsg, MigrateMsg};
+use crate::msg::{AdapterQueryMsg, ExecuteMsg, InstantiateMsg};
 use crate::state::{Config, CONFIG};
 
 #[cfg_attr(not(feature = "library"), entry_point)]

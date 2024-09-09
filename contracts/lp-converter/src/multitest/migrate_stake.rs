@@ -1,5 +1,4 @@
-use palomadex::{asset::MINIMUM_LIQUIDITY_AMOUNT, stake::ConverterConfig};
-use palomadex_stake::msg::MigrateMsg;
+use palomadex::asset::MINIMUM_LIQUIDITY_AMOUNT;
 
 use super::suite::{juno, uusd, Pair, SuiteBuilder, DAY};
 
@@ -68,75 +67,6 @@ fn migrate_to_existing_pool() {
     assert_eq!(
         stake.stake.u128(),
         ujuno_amount - MINIMUM_LIQUIDITY_AMOUNT.u128(),
-        "all of the stake that was previously in native LP should now be migrated to lsd LP"
-    );
-}
-
-#[test]
-fn migrate_converter_config() {
-    let user = "user";
-
-    let ujuno_amount = 1_000_000u128;
-    let uusd_amount = 1_000_000u128;
-
-    let unbonding_period = 14 * DAY;
-
-    let mut suite = SuiteBuilder::new()
-        .with_native_balances("ujuno", vec![(user, ujuno_amount)])
-        .with_native_balances("uusd", vec![(user, uusd_amount)])
-        .without_converter()
-        .build();
-
-    // provide some liquidity to the native pair
-    let native_lp = suite
-        .provide_liquidity(user, juno(ujuno_amount), uusd(uusd_amount))
-        .unwrap();
-
-    // stake native LP
-    suite
-        .stake_lp(Pair::Native, user, native_lp, unbonding_period)
-        .unwrap();
-
-    // migrating the liquidity before the converter is set should fail
-    let err = suite
-        .migrate_stake(Pair::Native, user, native_lp, unbonding_period)
-        .unwrap_err();
-    assert_eq!(
-        palomadex_stake::ContractError::NoConverter {},
-        err.downcast().unwrap()
-    );
-
-    // migrate the staking contract to add the converter
-    suite
-        .migrate_staking_contract(
-            Pair::Native,
-            MigrateMsg {
-                unbonder: None,
-                converter: Some(ConverterConfig {
-                    contract: suite.converter.to_string(),
-                    pair_to: suite.lsd_pair.to_string(),
-                }),
-                unbond_all: false,
-            },
-        )
-        .unwrap();
-
-    // migrate liquidity to lsd pair
-    suite
-        .migrate_stake(Pair::Native, user, native_lp, unbonding_period)
-        .unwrap();
-
-    // check that the stake was migrated
-    let stake = suite
-        .query_stake(Pair::Native, user, unbonding_period)
-        .unwrap();
-    assert_eq!(stake.stake.u128(), 0);
-    let stake = suite
-        .query_stake(Pair::Lsd, user, unbonding_period)
-        .unwrap();
-    assert_eq!(
-        stake.stake.u128(),
-        ujuno_amount - 2 * MINIMUM_LIQUIDITY_AMOUNT.u128(), // 2x because we lp'd twice on empty pools
         "all of the stake that was previously in native LP should now be migrated to lsd LP"
     );
 }
