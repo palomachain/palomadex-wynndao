@@ -577,7 +577,7 @@ fn provide_liquidity() {
         }],
     );
     let res = execute(deps.as_mut(), env.clone(), info, msg).unwrap();
-    let transfer_from_msg = res.messages.get(0).expect("no message");
+    let transfer_from_msg = res.messages.first().expect("no message");
     let mint_min_liquidity_msg = res.messages.get(1).expect("no message");
     let mint_receiver_msg = res.messages.get(2).expect("no message");
 
@@ -690,7 +690,7 @@ fn provide_liquidity() {
     );
 
     let res: Response = execute(deps.as_mut(), env, info, msg).unwrap();
-    let transfer_from_msg = res.messages.get(0).expect("no message");
+    let transfer_from_msg = res.messages.first().expect("no message");
     let mint_msg = res.messages.get(1).expect("no message");
     assert_eq!(
         transfer_from_msg,
@@ -945,7 +945,7 @@ fn withdraw_liquidity() {
     let res = execute(deps.as_mut(), env, info, msg).unwrap();
     let log_withdrawn_share = res.attributes.get(2).expect("no log");
     let log_refund_assets = res.attributes.get(3).expect("no log");
-    let msg_refund_0 = res.messages.get(0).expect("no message");
+    let msg_refund_0 = res.messages.first().expect("no message");
     let msg_refund_1 = res.messages.get(1).expect("no message");
     let msg_burn_liquidity = res.messages.get(2).expect("no message");
     assert_eq!(
@@ -1257,7 +1257,7 @@ mod disabled {
         );
 
         let res = execute(deps.as_mut(), env.clone(), info, msg).unwrap();
-        let msg_transfer = res.messages.get(0).expect("no message");
+        let msg_transfer = res.messages.first().expect("no message");
 
         let model: StableSwapModel = StableSwapModel::new(
             100,
@@ -1422,7 +1422,7 @@ mod disabled {
         let info = mock_info("asset0000", &[]);
 
         let res = execute(deps.as_mut(), env.clone(), info, msg).unwrap();
-        let msg_transfer = res.messages.get(0).expect("no message");
+        let msg_transfer = res.messages.first().expect("no message");
 
         let model: StableSwapModel = StableSwapModel::new(
             100,

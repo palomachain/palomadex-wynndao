@@ -19,7 +19,7 @@ fn multiple_distribution_flows() {
         "member3".to_owned(),
         "member4".to_owned(),
     ];
-    let bonds = vec![5_000u128, 10_000u128, 25_000u128];
+    let bonds = [5_000u128, 10_000u128, 25_000u128];
     let delegated: u128 = bonds.iter().sum();
     let unbonding_period = 1000u64;
 
@@ -203,7 +203,7 @@ fn mass_bond_with_multiple_distribution_flows() {
     ];
     // this guy hodls the funds to mass bond to others
     let richie = "richie rich";
-    let bonds = vec![5_000u128, 10_000u128, 25_000u128];
+    let bonds = [5_000u128, 10_000u128, 25_000u128];
     let delegated: u128 = bonds.iter().sum();
     let unbonding_period = 1000u64;
 
@@ -382,7 +382,7 @@ fn can_fund_an_inprogress_reward_period_with_more_funds_and_a_curve() {
         "member3".to_owned(),
         "member4".to_owned(),
     ];
-    let bonds = vec![5_000u128, 10_000u128, 25_000u128];
+    let bonds = [5_000u128, 10_000u128, 25_000u128];
     let delegated: u128 = bonds.iter().sum();
     let unbonding_period = 1000u64;
 
@@ -521,7 +521,7 @@ fn partial_payouts_by_rate() {
         "member3".to_owned(),
         "member4".to_owned(),
     ];
-    let bonds = vec![5_000u128, 10_000u128, 25_000u128];
+    let bonds = [5_000u128, 10_000u128, 25_000u128];
     let delegated: u128 = bonds.iter().sum();
     let unbonding_period = 1000u64;
 
@@ -691,7 +691,7 @@ fn divisible_amount_distributed_with_rate() {
         "member3".to_owned(),
         "member4".to_owned(),
     ];
-    let bonds = vec![5_000u128, 10_000u128, 25_000u128];
+    let bonds = [5_000u128, 10_000u128, 25_000u128];
     let delegated: u128 = bonds.iter().sum();
     let unbonding_period = 1000u64;
 
@@ -1138,7 +1138,7 @@ fn apr_cw20() {
 #[test]
 fn simple_apr_simulation() {
     let distributor = "distributor";
-    let members = vec!["member1", "member2"];
+    let members = ["member1", "member2"];
     let unbonding_periods = vec![1, 2, 3];
     let stakes = [100_000_000u128, 200_000_000u128];
     let rewards = 250_000_000u128;
@@ -1218,7 +1218,7 @@ fn divisible_amount_distributed() {
         "member3".to_owned(),
         "member4".to_owned(),
     ];
-    let bonds = vec![5_000u128, 10_000u128, 25_000u128];
+    let bonds = [5_000u128, 10_000u128, 25_000u128];
     let delegated: u128 = bonds.iter().sum();
     let unbonding_period = 1000u64;
 
@@ -1319,7 +1319,7 @@ fn divisible_amount_distributed_twice() {
         "member4".to_owned(),
     ];
 
-    let bonds = vec![5_000u128, 10_000u128, 25_000u128];
+    let bonds = [5_000u128, 10_000u128, 25_000u128];
     let delegated: u128 = bonds.iter().sum();
     let unbonding_period = 1000u64;
 
@@ -1398,7 +1398,7 @@ fn divisible_amount_distributed_twice_accumulated() {
         "member4".to_owned(),
     ];
 
-    let bonds = vec![5_000u128, 10_000u128, 25_000u128];
+    let bonds = [5_000u128, 10_000u128, 25_000u128];
     let unbonding_period = 1000u64;
 
     let mut suite = SuiteBuilder::new()
