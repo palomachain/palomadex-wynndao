@@ -58,7 +58,6 @@ pub(super) fn native_token(denom: String, amount: u128) -> AssetValidated {
 
 #[derive(Debug)]
 pub struct SuiteBuilder {
-    pub cw20_contract: String,
     pub tokens_per_power: Uint128,
     pub min_bond: Uint128,
     pub unbonding_periods: Vec<UnbondingPeriod>,
@@ -71,7 +70,6 @@ pub struct SuiteBuilder {
 impl SuiteBuilder {
     pub fn new() -> Self {
         Self {
-            cw20_contract: "".to_owned(),
             tokens_per_power: Uint128::new(1000),
             min_bond: Uint128::new(5000),
             unbonding_periods: vec![SEVEN_DAYS],

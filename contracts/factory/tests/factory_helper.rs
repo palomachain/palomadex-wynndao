@@ -11,8 +11,6 @@ use palomadex::fee_config::FeeConfig;
 use palomadex::pair::PairInfo;
 
 pub struct FactoryHelper {
-    pub owner: Addr,
-    pub astro_token: Addr,
     pub factory: Addr,
     pub cw20_token_code_id: u64,
 }
@@ -44,7 +42,7 @@ impl FactoryHelper {
             marketing: None,
         };
 
-        let astro_token = router
+        let _astro_token = router
             .instantiate_contract(
                 cw20_token_code_id,
                 owner.clone(),
@@ -125,8 +123,6 @@ impl FactoryHelper {
             .unwrap();
 
         Self {
-            owner: owner.clone(),
-            astro_token,
             factory,
             cw20_token_code_id,
         }

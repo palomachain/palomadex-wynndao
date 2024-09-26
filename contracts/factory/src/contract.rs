@@ -656,7 +656,7 @@ pub mod reply {
 /// Removes an existing pair from the factory.
 ///
 /// * **asset_infos** is a vector with assets for which we deregister the pair.
-/// The LP Staking Contract will also be deregistered and does not need to be provided.
+///   The LP Staking Contract will also be deregistered and does not need to be provided.
 ///
 /// ## Executor
 /// Only the owner can execute this.
@@ -716,7 +716,7 @@ pub fn deregister_pool_and_staking(
 /// * **QueryMsg::Pair { asset_infos }** Returns a [`PairInfo`] object with information about a specific Palomadex pair.
 ///
 /// * **QueryMsg::Pairs { start_after, limit }** Returns an array that contains items of type [`PairInfo`].
-/// This returns information about multiple Palomadex pairs
+///   This returns information about multiple Palomadex pairs
 ///
 /// * **QueryMsg::FeeInfo { pair_type }** Returns the fee structure (total and protocol fees) for a specific pair type.
 ///
@@ -791,7 +791,7 @@ pub fn query_pair(deps: Deps, asset_infos: Vec<AssetInfo>) -> StdResult<PairInfo
 
 /// Returns a vector with pair data that contains items of type [`PairInfo`]. Querying starts at `start_after` and returns `limit` pairs.
 /// * **start_after** is a field which accepts a vector with items of type [`AssetInfo`].
-/// This is the pair from which we start a query.
+///   This is the pair from which we start a query.
 ///
 /// * **limit** sets the number of pairs to be retrieved.
 pub fn query_pairs(
