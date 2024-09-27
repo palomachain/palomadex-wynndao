@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - release/*
+      - bugfix/action-cosmwasm-check
 
 name: Wasm Checks
 
@@ -31,7 +32,7 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: install
-          args: --debug --version 1.2.0 cosmwasm-check
+          args: --debug cosmwasm-check
 
       - name: Check wasm contracts
         run: cosmwasm-check ./target/wasm32-unknown-unknown/release/*.wasm
