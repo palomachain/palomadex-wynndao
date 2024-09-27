@@ -330,7 +330,7 @@ fn provide_liquidity_changing_rate() {
 
 #[test]
 fn changing_target_rate() {
-    let target_rate = Decimal::from_str("1.5").unwrap();
+    let mut target_rate = Decimal::from_str("1.5").unwrap();
     let mut suite = SuiteBuilder::new()
         .with_funds("sender", &[coin(1_000_000_000_000_000_000_000, "juno")])
         .with_funds(
@@ -370,7 +370,6 @@ fn changing_target_rate() {
 
     let max_target_rate = Decimal::from_str("1.6").unwrap();
     let target_rate_step = Decimal::from_str("0.01").unwrap();
-    let mut target_rate = target_rate;
     while target_rate < max_target_rate {
         // change target rate and wait for cache to expire
         target_rate += target_rate_step;
@@ -409,7 +408,6 @@ fn changing_target_rate() {
 
     let min_target_rate = Decimal::from_str("1.4").unwrap();
     let target_rate_step = Decimal::from_str("0.1").unwrap();
-    let mut target_rate = target_rate;
     while target_rate > min_target_rate {
         // change target rate and wait for cache to expire
         target_rate -= target_rate_step;

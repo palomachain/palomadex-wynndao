@@ -93,7 +93,7 @@ pub fn reply(deps: DepsMut, _env: Env, msg: Reply) -> Result<Response, ContractE
 /// * **ExecuteMsg::UpdateConfig { params: Binary }** Not supported.
 ///
 /// * **ExecuteMsg::Receive(msg)** Receives a message of type [`Cw20ReceiveMsg`] and processes
-/// it depending on the received template.
+///   it depending on the received template.
 ///
 /// * **ExecuteMsg::ProvideLiquidity {
 ///             assets,
@@ -249,11 +249,11 @@ pub fn update_fees(
 /// * **assets** is an array with assets available in the pool.
 ///
 /// * **slippage_tolerance** is an optional parameter which is used to specify how much
-/// the pool price can move until the provide liquidity transaction goes through.
+///   the pool price can move until the provide liquidity transaction goes through.
 ///
 ///
 /// * **receiver** is an optional parameter which defines the receiver of the LP tokens.
-/// If no custom receiver is specified, the pair will mint LP tokens for the function caller.
+///   If no custom receiver is specified, the pair will mint LP tokens for the function caller.
 ///
 /// NOTE - the address that wants to provide liquidity should approve the pair contract to pull its relevant tokens.
 pub fn provide_liquidity(
@@ -828,21 +828,21 @@ pub fn calculate_protocol_fee(
 /// * **QueryMsg::Pair {}** Returns information about the pair in an object of type [`PairInfo`].
 ///
 /// * **QueryMsg::Pool {}** Returns information about the amount of assets in the pair contract as
-/// well as the amount of LP tokens issued using an object of type [`PoolResponse`].
+///   well as the amount of LP tokens issued using an object of type [`PoolResponse`].
 ///
 /// * **QueryMsg::Share { amount }** Returns the amount of assets that could be withdrawn from the pool
-/// using a specific amount of LP tokens. The result is returned in a vector that contains objects of type [`Asset`].
+///   using a specific amount of LP tokens. The result is returned in a vector that contains objects of type [`Asset`].
 ///
 /// * **QueryMsg::Simulation { offer_asset }** Returns the result of a swap simulation using a [`SimulationResponse`] object.
 ///
 /// * **QueryMsg::ReverseSimulation { ask_asset }** Returns the result of a reverse swap simulation  using
-/// a [`ReverseSimulationResponse`] object.
+///   a [`ReverseSimulationResponse`] object.
 ///
 /// * **QueryMsg::CumulativePrices {}** Returns information about cumulative prices for the assets in the
-/// pool using a [`CumulativePricesResponse`] object.
+///   pool using a [`CumulativePricesResponse`] object.
 ///
 /// * **QueryMsg::HistoricalPrices { duration }** Returns historical price information for the assets in the
-/// pool using a [`HistoricalPricesResponse`] object.
+///   pool using a [`HistoricalPricesResponse`] object.
 ///
 /// * **QueryMsg::Config {}** Returns the configuration for the pair contract using a [`ConfigResponse`] object.
 #[cfg_attr(not(feature = "library"), entry_point)]
@@ -972,7 +972,7 @@ pub fn query_simulation(
 /// Returns information about a reverse swap simulation in a [`ReverseSimulationResponse`] object.
 ///
 /// * **ask_asset** is the asset to swap to as well as the desired amount of ask
-/// assets to receive from the swap.
+///   assets to receive from the swap.
 pub fn query_reverse_simulation(
     deps: Deps,
     ask_asset: Asset,

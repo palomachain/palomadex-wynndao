@@ -394,7 +394,7 @@ mod query {
     /// * **offer_amount** amount of offer assets being swapped.
     ///
     /// * **operations** is a vector that contains objects of type [`SwapOperation`].
-    /// These are all the swap operations for which we perform a simulation.
+    ///   These are all the swap operations for which we perform a simulation.
     pub fn simulate_swap_operations(
         deps: Deps,
         offer_amount: Uint128,
@@ -487,7 +487,7 @@ mod query {
     /// * **ask_amount** amount of offer assets being swapped.
     ///
     /// * **operations** is a vector that contains objects of type [`SwapOperation`].
-    /// These are all the swap operations for which we perform a simulation.
+    ///   These are all the swap operations for which we perform a simulation.
     pub fn simulate_reverse_swap_operations(
         deps: Deps,
         ask_amount: Uint128,
