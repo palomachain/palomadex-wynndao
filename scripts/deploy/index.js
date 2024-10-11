@@ -16,17 +16,16 @@ const palomaConfigPath = "configs/paloma_config.json";
 const multiHopConfigPath = "configs/multi_hop_config.json";
 const gaugesConfigPath = "configs/gauges_config.json";
 
-const factoryWasmPath = "/contracts/wyndex_factory.wasm";
+const factoryWasmPath = "/contracts/palomadex_factory.wasm";
 const gaugeAdapterWasmPath = "/contracts/gauge_adapter.wasm";
 const gaugeOrchestratorWasmPath = "/contracts/gauge_orchestrator.wasm";
-const multiHopWasmPath = "/contracts/wyndex_multi_hop.wasm";
-const pairWasmPath = "/contracts/wyndex_pair.wasm";
-const pairStableWasmPath = "/contracts/wyndex_pair_stable.wasm";
-const stakeWasmPath = "/contracts/wyndex_stake.wasm";
+const multiHopWasmPath = "/contracts/palomadex_multi_hop.wasm";
+const pairWasmPath = "/contracts/palomadex_pair.wasm";
+const pairStableWasmPath = "/contracts/palomadex_pair_lsd.wasm";
+const stakeWasmPath = "/contracts/palomadex_stake.wasm";
 const tokenWasmPath = "/contracts/cw20_base.wasm";
 const daoCoreWasmPath = "/contracts/dao_dao_core.wasm";
 const proposalSingleWasmPath = "/contracts/dao_proposal_single.wasm";
-const cw4StakeWasmPath = "/contracts/wynd_stake.wasm";
 
 // Check "MNEMONIC" env variable and ensure it is set to a reasonable value
 function getMnemonic() {
@@ -306,14 +305,14 @@ async function main() {
     const factoryConfig = readJsonConfig(factoryConfigPath);
 
     // Store palomadex-stake, pair and pair-stable required for factory's instantiation
-    const tokenCodeId = 17; // await storeContract(client, address, palomaConfig.gasPrice, "token", tokenWasmPath);
-    const pairCodeId = 18; // await storeContract(client, address, palomaConfig.gasPrice, "pair", pairWasmPath);
-    const pairStableCodeId = 19; // await storeContract(client, address, palomaConfig.gasPrice, "pair-stable", pairStableWasmPath);
-    const stakeCodeId = 20; // await storeContract(client, address, palomaConfig.gasPrice, "stake", stakeWasmPath);
-    const factoryCodeId = 26; // await storeContract(client, address, palomaConfig.gasPrice, "factory", factoryWasmPath);
-    const multiHopCodeId = 27; // await storeContract(client, address, palomaConfig.gasPrice, "multi-hop", multiHopWasmPath);
-    const gaugeOrchestratorCodeId = 28; // await storeContract(client, address, palomaConfig.gasPrice, "gauge-orchestrator", gaugeOrchestratorWasmPath);
-    const gaugeAdapterCodeId = 29; // await storeContract(client, address, palomaConfig.gasPrice, "gauge-adapter", gaugeAdapterWasmPath);
+    const tokenCodeId = await storeContract(client, address, palomaConfig.gasPrice, "token", tokenWasmPath);
+    const pairCodeId = await storeContract(client, address, palomaConfig.gasPrice, "pair", pairWasmPath);
+    const pairStableCodeId = await storeContract(client, address, palomaConfig.gasPrice, "pair-stable", pairStableWasmPath);
+    const stakeCodeId = await storeContract(client, address, palomaConfig.gasPrice, "stake", stakeWasmPath);
+    const factoryCodeId = await storeContract(client, address, palomaConfig.gasPrice, "factory", factoryWasmPath);
+    const multiHopCodeId = await storeContract(client, address, palomaConfig.gasPrice, "multi-hop", multiHopWasmPath);
+    const gaugeOrchestratorCodeId = await storeContract(client, address, palomaConfig.gasPrice, "gauge-orchestrator", gaugeOrchestratorWasmPath);
+    const gaugeAdapterCodeId = await storeContract(client, address, palomaConfig.gasPrice, "gauge-adapter", gaugeAdapterWasmPath);
 
     console.info("token_code_id: " + tokenCodeId);
     console.info("pair_code_id: " + pairCodeId);
@@ -358,17 +357,17 @@ async function main() {
 
     // multi hop
     const multiHopConfig = readJsonConfig(multiHopConfigPath);
-    multiHopConfig.instantiate.wyndex_factory = factoryAddress;
+    multiHopConfig.instantiate.palomadex_factory = factoryAddress;
     writeJsonConfig(multiHopConfigPath, multiHopConfig);
     const multiHopAddress = await instantiateContract(client, address, palomaConfig.gasPrice, multiHopConfig, multiHopCodeId);
 
     // create pairs
     const pairs = await createPairsAndDistributionFlows(client, address, palomaConfig.gasPrice, factoryConfig, factoryAddress);
 
-    // INSTANTIATE THE DAO - DAO-CORE, CW-PROPOSAL-SINGLE AND WYND-STAKE
-    const daoCoreCodeId = 30; // await storeContract(client, address, palomaConfig.gasPrice, "dao-core", daoCoreWasmPath);
-    const proposalSingleCodeId = 31; // await storeContract(client, address, palomaConfig.gasPrice, "proposal-single", proposalSingleWasmPath);
-    const cw4StakeCodeId = 32; // await storeContract(client, address, palomaConfig.gasPrice, "cw4-stake", cw4StakeWasmPath);
+    // INSTANTIATE THE DAO - DAO-CORE, CW-PROPOSAL-SINGLE AND PALOMADEX-STAKE
+    const daoCoreCodeId = await storeContract(client, address, palomaConfig.gasPrice, "dao-core", daoCoreWasmPath);
+    const proposalSingleCodeId = await storeContract(client, address, palomaConfig.gasPrice, "proposal-single", proposalSingleWasmPath);
+    const cw4StakeCodeId = await storeContract(client, address, palomaConfig.gasPrice, "cw4-stake", stakeWasmPath);
 
     // Instantiate DAO Core and its modules
     const daoCoreAddress = await instantiateDaoCoreWithModules(client, address, palomaConfig.gasPrice, daoCoreCodeId, cw4StakeCodeId, proposalSingleCodeId, cw20TokenAddress);

@@ -17,3 +17,6 @@ target/
 /artifacts/
 /contracts/**/schema/
 /schema/
+
+# node_modules
+node_modules/
